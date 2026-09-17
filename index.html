@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mike — a personal AI assistant that lives on your computer</title>
+<meta name="description" content="Mike is a voice-first, local-first AI assistant that lives on your computer. Talk to it. Let it work." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d0d0c'/%3E%3Crect x='9' y='13' width='3' height='6' rx='1.5' fill='%23faf9f7'/%3E%3Crect x='14.5' y='8' width='3' height='16' rx='1.5' fill='%23faf9f7'/%3E%3Crect x='20' y='11' width='3' height='10' rx='1.5' fill='%23faf9f7'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="progress-bar" id="progress-bar"></div>
+<div class="bg-grid" aria-hidden="true"></div>
+
+<nav class="nav" id="nav">
+  <a href="#" class="nav__mark"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Mike</a>
+  <div class="nav__links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#privacy">Privacy</a>
+    <a href="https://github.com/navdeepcodes/NavAI/releases/download/v1.0.0/Mike-macOS-1.0.0.zip" class="nav__cta">Download for Mac <span class="nav__kbd">⌘⇧Space</span></a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container hero__grid">
+    <div class="hero__copy">
+      <div class="hero__kicker" id="hero-kicker"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Now in early access</div>
+      <h1 id="hero-h1">Meet Mike.</h1>
+      <h2 id="hero-h2">Your computer, with a brain.</h2>
+      <p id="hero-p">A personal AI assistant that lives on your computer. Talk to it naturally, and it understands your files, your apps, and what you're trying to get done — then does it.</p>
+      <div class="hero__actions" id="hero-actions">
+        <a href="https://github.com/navdeepcodes/NavAI/releases/download/v1.0.0/Mike-macOS-1.0.0.zip" class="btn">Download for macOS</a>
+        <a href="#how-it-works" class="link-quiet">Watch it work</a>
+      </div>
+      <div class="hero__hint" id="hero-hint">87 MB, macOS 12+. Hold <span class="kbd">⌘⇧Space</span> to talk to Mike, anytime.</div>
+    </div>
+
+    <div class="hero__stage">
+      <span class="hero__annotation hero__annotation--top reveal" aria-hidden="true">A real Mike capability, illustrated</span>
+      <div class="device" id="hero-device">
+        <div class="device__bar">
+          <span class="device__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="device__title">Mike</span>
+          <span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        </div>
+        <div class="device__body">
+          <div class="device__desktop" id="device-desktop" aria-hidden="true">
+            <div class="desktop-label">Downloads</div>
+            <div class="dicon" style="--mx:10%; --my:20%; --sx:8%; --sy:30%; --r:-8deg;"><span class="file-chip"></span></div>
+            <div class="dicon" style="--mx:56%; --my:14%; --sx:8%; --sy:48%; --r:6deg;"><span class="file-chip"></span></div>
+            <div class="dicon" style="--mx:30%; --my:48%; --sx:8%; --sy:66%; --r:-4deg;"><span class="file-chip"></span></div>
+            <div class="dicon" style="--mx:72%; --my:32%; --sx:40%; --sy:30%; --r:10deg;"><span class="file-chip"></span></div>
+            <div class="dicon" style="--mx:8%; --my:64%; --sx:40%; --sy:48%; --r:5deg;"><span class="file-chip"></span></div>
+            <div class="dicon" style="--mx:46%; --my:70%; --sx:40%; --sy:66%; --r:-10deg;"><span class="file-chip"></span></div>
+            <div class="dicon" style="--mx:80%; --my:58%; --sx:72%; --sy:30%; --r:3deg;"><span class="file-chip"></span></div>
+            <div class="dicon" style="--mx:60%; --my:44%; --sx:72%; --sy:48%; --r:-6deg;"><span class="file-chip"></span></div>
+            <div class="dicon" style="--mx:20%; --my:80%; --sx:72%; --sy:66%; --r:8deg;"><span class="file-chip"></span></div>
+            <div class="folder-label" style="--fx:8%; --fy:16%;">Invoices</div>
+            <div class="folder-label" style="--fx:40%; --fy:16%;">Screenshots</div>
+            <div class="folder-label" style="--fx:72%; --fy:16%;">Installers</div>
+          </div>
+          <div class="device__assistant">
+            <div class="mini-wave" id="device-wave" aria-hidden="true"></div>
+            <div class="device__line">
+              <span class="who">You</span>
+              <span class="txt" id="device-you"></span>
+            </div>
+            <div class="device__line device__line--mike">
+              <span class="who">Mike</span>
+              <span class="txt" id="device-response"></span>
+            </div>
+          </div>
+        </div>
+        <div class="device__dock" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <button class="device__replay" id="device-replay" type="button">↺ Replay</button>
+      </div>
+      <span class="hero__annotation hero__annotation--bottom reveal" aria-hidden="true">Same Mike, running on files, apps, and code</span>
+    </div>
+  </div>
+
+  <div class="container hero__meta reveal">
+    <div class="hero__meta-item"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Voice &amp; text</div>
+    <div class="hero__meta-item">Local-first</div>
+    <div class="hero__meta-item">Native on macOS</div>
+    <div class="hero__meta-item">Free in early access</div>
+  </div>
+</header>
+
+<section class="statement">
+  <div class="statement__inner">
+    <span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>
+    <p>A chatbot is somewhere you go.</p>
+    <h3>Mike is somewhere you already are.</h3>
+  </div>
+</section>
+
+<section id="how-it-works">
+  <div class="container">
+    <div class="section__head reveal">
+      <h3>How Mike works</h3>
+      <p>Mike understands what's happening on your computer, and helps you act on it — not just talk about it.</p>
+    </div>
+
+    <div class="how__grid">
+      <div class="how__list">
+        <div class="how__item" data-scene="talk">
+          <h4>Talk</h4>
+          <p>Speak naturally, or type. No commands to memorize, no syntax to learn — just say what you need.</p>
+        </div>
+        <div class="how__item" data-scene="see">
+          <h4>See</h4>
+          <p>Mike understands what's on your screen, in your files, and in your open apps, so you don't have to explain the context yourself.</p>
+        </div>
+        <div class="how__item" data-scene="act">
+          <h4>Act</h4>
+          <p>It can use applications, move and edit files, and carry out real tasks on your computer — then tell you exactly what changed.</p>
+        </div>
+        <div class="how__item" data-scene="remember">
+          <h4>Remember</h4>
+          <p>Mike keeps track of what matters so you don't have to explain yourself twice, session after session.</p>
+        </div>
+      </div>
+
+      <div class="how__stage-wrap">
+        <div class="how__stage">
+          <div class="stage-scene stage-talk" data-scene="talk">
+            <div class="stage-scene__label">Listening</div>
+            <div class="mini-wave" aria-hidden="true"></div>
+            <div class="bubble">"Reschedule my 3pm with the design team."</div>
+          </div>
+          <div class="stage-scene stage-see" data-scene="see">
+            <div class="stage-scene__label">Watching your screen</div>
+            <div class="stage-see__frame">
+              <div class="stage-see__row"><span class="box"></span>Calendar — 3:00pm Design sync</div>
+              <div class="stage-see__row is-flagged"><span class="box"></span>Conflicts with 3:15pm Onboarding call</div>
+              <div class="stage-see__row"><span class="box"></span>4 attendees, 2 time zones</div>
+            </div>
+            <div class="stage-see__note">Mike noticed the overlap before you did.</div>
+          </div>
+          <div class="stage-scene stage-act" data-scene="act">
+            <div class="stage-scene__label">Acting</div>
+            <div class="stage-act__task">
+              <span class="stage-act__check" aria-hidden="true"></span>
+              Move 3pm Design sync to 4pm
+            </div>
+            <div class="stage-act__meta">Sent to 4 attendees. Room and video link carried over.</div>
+          </div>
+          <div class="stage-scene stage-remember" data-scene="remember">
+            <div class="stage-scene__label">What Mike remembers</div>
+            <div class="chip-row">
+              <span class="chip">Prefers meetings after 10am</span>
+              <span class="chip">Works mostly in Figma and VS Code</span>
+              <span class="chip">Calls Fridays "ship day"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="capabilities how__secondary">
+      <div class="capability reveal">
+        <div class="capability__name">Code</div>
+        <div class="capability__desc">Write, edit, and run code alongside you, in your own project — Mike is a strong developer tool, not only a chatbot that talks about code.</div>
+      </div>
+      <div class="capability reveal">
+        <div class="capability__name">Stay close</div>
+        <div class="capability__desc">Built local-first, to keep your data and your work on your own machine wherever possible.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try" id="access">
+  <div class="container">
+    <div class="section__head reveal" style="margin-left:auto;margin-right:auto;text-align:center;">
+      <h3>Try it.</h3>
+      <p>Ask Mike something. This is a preview of how it feels to talk to it.</p>
+    </div>
+    <div class="try__bar reveal">
+      <form id="try-form" class="try__form" autocomplete="off">
+        <svg class="try__mic" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <input id="try-input" class="try__input" type="text" placeholder="e.g. Summarize my open PRs" autocomplete="off" maxlength="80" />
+        <button type="submit" class="try__submit">Ask</button>
+      </form>
+    </div>
+    <div class="try__reply" id="try-reply-line" hidden>
+      <span class="who">Mike</span>
+      <span class="txt" id="try-response"></span>
+    </div>
+  </div>
+</section>
+
+<section class="pullquote-section">
+  <div class="container pullquote-section">
+    <div class="pullquote reveal">
+      <blockquote>Models will change. The assistant remains.</blockquote>
+      <p>Mike's job isn't to be the smartest model running underneath. It's to be the same assistant — the one that knows your context, your files, and your habits — no matter what's changed since yesterday.</p>
+    </div>
+    <div class="persist-diagram reveal" aria-hidden="true">
+      <div class="persist-diagram__row is-fading"><span class="tag">2023 model</span> handled requests</div>
+      <div class="persist-diagram__row is-fading"><span class="tag">2024 model</span> handled requests</div>
+      <div class="persist-diagram__row is-current"><span class="tag">2026 model</span> handles requests</div>
+      <div class="persist-diagram__divider"></div>
+      <div class="persist-diagram__constant"><span class="mark"><i></i><i></i><i></i></span> Mike — same assistant throughout</div>
+    </div>
+  </div>
+</section>
+
+<section class="privacy" id="privacy">
+  <div class="container privacy__grid">
+    <h3>Built around your privacy, honestly explained</h3>
+    <div class="privacy__copy reveal">
+      <p>Mike is local-first: designed to keep as much of your activity and data on your own computer as possible, and to be plain with you about what leaves it and why.</p>
+      <p>That's a design principle, not an absolute guarantee — no assistant built on AI models can promise perfect privacy. Mike will always tell you what it can see, what it remembers, and how to control it.</p>
+      <div class="privacy-diagram">
+        <div class="privacy-diagram__node privacy-diagram__node--local">Your computer<br>files, memory, control</div>
+        <span class="privacy-diagram__link" aria-hidden="true"></span>
+        <div class="privacy-diagram__node privacy-diagram__node--cloud">Cloud model<br>only what's needed, per request</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container cta__inner">
+    <h3>Don't just ask your computer what to do.<br>Ask Mike to do it.</h3>
+    <p class="cta__meta">Early access for macOS, v1.0.0, 87 MB.</p>
+    <div class="cta__actions">
+      <a href="https://github.com/navdeepcodes/NavAI/releases/download/v1.0.0/Mike-macOS-1.0.0.zip" class="btn">Download for macOS</a>
+    </div>
+    <div class="cta__hint">Hold <span class="kbd">⌘⇧Space</span> to talk to Mike, anytime.</div>
+    <div class="cta__note" id="download-note">First launch: Mike isn't notarized yet, so macOS will flag it. Right-click the app → Open, then Open again in the dialog. You'll only need to do this once.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer__grid">
+    <div class="footer__brand">
+      <div class="footer__mark"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Mike</div>
+      <p class="footer__tagline">A personal AI assistant that lives on your computer. Talk to it, and let it work.</p>
+      <div class="footer__hint">Hold <span class="kbd">⌘⇧Space</span> to talk to Mike, anytime.</div>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-title">Product</div>
+      <a href="#how-it-works">How it works</a>
+      <a href="#access">Try it</a>
+      <a href="https://github.com/navdeepcodes/NavAI/releases/download/v1.0.0/Mike-macOS-1.0.0.zip">Download for macOS</a>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-title">Company</div>
+      <a href="#privacy">Privacy</a>
+      <a href="mailto:hello@meetmike.ai">Contact</a>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-title">Platform</div>
+      <span>macOS, native</span>
+      <span>Local-first</span>
+      <span>Early access</span>
+    </div>
+  </div>
+  <div class="container footer__bottom">
+    <span>© 2026 Mike.</span>
+    <span>Models will change. The assistant remains.</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
