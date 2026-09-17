@@ -6,6 +6,63 @@
 (function () {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // ---------- Platform detection ----------
+  // Picks the right download for the visitor's OS, defaulting to macOS
+  // when detection is inconclusive (e.g. Linux, iPad).
+  function detectPlatform() {
+    const uaData = navigator.userAgentData;
+    if (uaData && uaData.platform) {
+      const p = uaData.platform.toLowerCase();
+      if (p.includes("mac")) return "mac";
+      if (p.includes("win")) return "win";
+    }
+    const ua = navigator.userAgent || "";
+    if (/Windows/i.test(ua)) return "win";
+    if (/Mac OS X|Macintosh/i.test(ua)) return "mac";
+    return "mac";
+  }
+
+  const platform = detectPlatform();
+  const other = platform === "mac" ? "win" : "mac";
+
+  function applyPlatform(btn) {
+    if (!btn) return;
+    btn.href = btn.dataset[platform + "Href"];
+    btn.textContent = btn.dataset[platform + "Label"];
+  }
+  applyPlatform(document.getElementById("dl-primary"));
+  applyPlatform(document.getElementById("dl-primary-2"));
+
+  const dlMeta = document.getElementById("dl-meta");
+  if (dlMeta) {
+    dlMeta.textContent = platform === "mac" ? "87 MB, macOS 12+." : "Windows 10+.";
+  }
+  const dlMeta2 = document.getElementById("dl-meta-2");
+  if (dlMeta2) {
+    dlMeta2.textContent =
+      platform === "mac" ? "Early testing build for macOS, v1.0.0, 87 MB." : "Early testing build for Windows, v1.0.0.";
+  }
+
+  const altHref = document.getElementById("dl-primary")?.dataset[other + "Href"];
+  const altLabel = other === "mac" ? "Not on Windows? Get Mike for macOS" : "Not on macOS? Get Mike for Windows";
+  const dlAltLink = document.getElementById("dl-alt-link");
+  if (dlAltLink && altHref) {
+    dlAltLink.href = altHref;
+    dlAltLink.textContent = altLabel;
+  }
+  const dlAltLink2 = document.getElementById("dl-alt-link-2");
+  if (dlAltLink2 && altHref) {
+    dlAltLink2.href = altHref;
+    dlAltLink2.textContent = altLabel;
+  }
+
+  const noteMac = document.getElementById("download-note-mac");
+  const noteWin = document.getElementById("download-note-win");
+  if (noteMac && noteWin) {
+    noteMac.hidden = platform !== "mac";
+    noteWin.hidden = platform === "mac";
+  }
+
   function buildMiniWave(el, count) {
     if (!el || el.dataset.built) return;
     el.dataset.built = "1";
@@ -52,6 +109,7 @@
     document.getElementById("hero-p"),
     document.getElementById("hero-actions"),
     document.getElementById("hero-hint"),
+    document.getElementById("dl-alt"),
   ].filter(Boolean);
   const heroDevice = document.getElementById("hero-device");
 
