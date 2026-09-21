@@ -267,6 +267,49 @@
     setActive(howItems[0].dataset.scene);
   }
 
+  // ---------- Under-the-hood loop diagram ----------
+  const loopDiagram = document.getElementById("loop-diagram");
+  const loopIndicator = document.getElementById("loop-indicator");
+  const loopNodes = document.querySelectorAll(".loop__node");
+  if (loopDiagram && loopIndicator && loopNodes.length && !reduceMotion) {
+    let loopStep = 0;
+    let loopTimer = null;
+
+    function setLoopStep(step) {
+      loopStep = step;
+      loopIndicator.style.transform = `translateX(${step * 100}%)`;
+      loopNodes.forEach((node) => {
+        node.classList.toggle("is-active", Number(node.dataset.step) === step);
+      });
+    }
+
+    function startLoop() {
+      if (loopTimer) return;
+      loopTimer = setInterval(() => setLoopStep((loopStep + 1) % loopNodes.length), 2400);
+    }
+
+    function stopLoop() {
+      if (!loopTimer) return;
+      clearInterval(loopTimer);
+      loopTimer = null;
+    }
+
+    if ("IntersectionObserver" in window) {
+      const loopIo = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => (entry.isIntersecting ? startLoop() : stopLoop()));
+        },
+        { threshold: 0.4 }
+      );
+      loopIo.observe(loopDiagram);
+    } else {
+      startLoop();
+    }
+
+    loopDiagram.addEventListener("mouseenter", stopLoop);
+    loopDiagram.addEventListener("mouseleave", startLoop);
+  }
+
   // ---------- Try Mike widget ----------
   const tryForm = document.getElementById("try-form");
   const tryInput = document.getElementById("try-input");
@@ -281,6 +324,16 @@
     { match: /summar/i, text: "Summarized the doc into five bullet points, saved as notes.md." },
   ];
   const DEFAULT_REPLY = "Got it — working on that now.";
+
+  const trySuggestions = document.getElementById("try-suggestions");
+  if (trySuggestions && tryForm && tryInput) {
+    trySuggestions.addEventListener("click", (e) => {
+      const chip = e.target.closest(".try__chip");
+      if (!chip || tryInput.disabled) return;
+      tryInput.value = chip.dataset.fill || chip.textContent;
+      tryForm.requestSubmit ? tryForm.requestSubmit() : tryForm.dispatchEvent(new Event("submit", { cancelable: true }));
+    });
+  }
 
   if (tryForm) {
     tryForm.addEventListener("submit", (e) => {

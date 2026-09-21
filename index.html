@@ -194,6 +194,7 @@
             <div class="stage-scene__label">Acting</div>
             <div class="stage-act__task">
               <span class="stage-act__check" aria-hidden="true"></span>
+              <span class="stage-act__cursor" aria-hidden="true"></span>
               Move 3pm Design sync to 4pm
             </div>
             <div class="stage-act__meta">Sent to 4 attendees. Room and video link carried over.</div>
@@ -212,12 +213,64 @@
 
     <div class="capabilities how__secondary">
       <div class="capability reveal">
-        <div class="capability__name">Code</div>
-        <div class="capability__desc">Write, edit, and run code alongside you, in your own project — Mike is a strong developer tool, not only a chatbot that talks about code.</div>
+        <svg class="capability__glyph" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2.5 5.5a1 1 0 0 1 1-1h4l1.5 2h7a1 1 0 0 1 1 1v7.5a1 1 0 0 1-1 1h-12.5a1 1 0 0 1-1-1V5.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <div class="capability__name">Files</div>
+        <div class="capability__desc">Finds, reads, organizes, and edits files exactly where they live — no exporting into a chat window first.</div>
       </div>
       <div class="capability reveal">
-        <div class="capability__name">Stay close</div>
-        <div class="capability__desc">Built local-first, to keep your data and your work on your own machine wherever possible.</div>
+        <svg class="capability__glyph" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 6 3 10l4 4M13 6l4 4-4 4M11.5 4.5l-3 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="capability__name">Code</div>
+        <div class="capability__desc">Writes, edits, and runs code alongside you in your own project, through a real editor bridge — a developer tool, not a chatbot that talks about code.</div>
+      </div>
+      <div class="capability reveal">
+        <svg class="capability__glyph" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.5" y="2.5" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="7.5" y="7.5" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="var(--paper)"/></svg>
+        <div class="capability__name">Apps</div>
+        <div class="capability__desc">Moves between the apps you already have open and operates them the way you would — clicking, typing, and switching focus.</div>
+      </div>
+      <div class="capability reveal">
+        <svg class="capability__glyph" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2" y="3.5" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 8l2.5 2.5-2.5 2.5M10.5 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="capability__name">Terminal</div>
+        <div class="capability__desc">Runs commands, reads what came back, and reacts to it — including when something fails.</div>
+      </div>
+      <div class="capability reveal">
+        <svg class="capability__glyph" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2" y="4.5" width="16" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2.8 5.5 10 11l7.2-5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="capability__name">Mail &amp; calendar</div>
+        <div class="capability__desc">Drafts replies, checks your schedule, and flags conflicts before you're the one who finds them.</div>
+      </div>
+      <div class="capability reveal">
+        <svg class="capability__glyph" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="15" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 8h15M2.5 13h15M8 2.5v15M13 2.5v15" stroke="currentColor" stroke-width="1.2"/></svg>
+        <div class="capability__name">Spreadsheets</div>
+        <div class="capability__desc">Builds and edits real spreadsheets — formulas included, not a screenshot of one.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="loop" id="loop">
+  <div class="container">
+    <div class="section__head reveal">
+      <h3>What happens when you ask</h3>
+      <p>Every request runs the same loop underneath — reflex, not magic.</p>
+    </div>
+    <div class="loop__diagram" id="loop-diagram">
+      <div class="loop__track" aria-hidden="true"><span class="loop__indicator" id="loop-indicator"></span></div>
+      <div class="loop__nodes">
+        <div class="loop__node is-active" data-step="0">
+          <h4>Observe</h4>
+          <p>Reads the screen, the file, or the app it needs to understand the task.</p>
+        </div>
+        <div class="loop__node" data-step="1">
+          <h4>Understand</h4>
+          <p>Works out what you actually want, not just the literal words.</p>
+        </div>
+        <div class="loop__node" data-step="2">
+          <h4>Act</h4>
+          <p>Clicks, types, edits, and runs — the same way you would.</p>
+        </div>
+        <div class="loop__node" data-step="3">
+          <h4>Verify</h4>
+          <p>Checks its own work, then tells you exactly what changed.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -228,6 +281,12 @@
     <div class="section__head reveal" style="margin-left:auto;margin-right:auto;text-align:center;">
       <h3>Try it.</h3>
       <p>Ask Mike something. This is a preview of how it feels to talk to it.</p>
+    </div>
+    <div class="try__suggestions reveal" id="try-suggestions">
+      <button type="button" class="try__chip" data-fill="Clean up my downloads folder">Clean up my downloads</button>
+      <button type="button" class="try__chip" data-fill="Summarize my open PRs">Summarize my open PRs</button>
+      <button type="button" class="try__chip" data-fill="Move my 3pm meeting to 4">Move my 3pm meeting</button>
+      <button type="button" class="try__chip" data-fill="Draft a reply to that email">Draft a reply to an email</button>
     </div>
     <div class="try__bar reveal">
       <form id="try-form" class="try__form" autocomplete="off">
