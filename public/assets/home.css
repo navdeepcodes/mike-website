@@ -57,18 +57,30 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; margin: 0; }
 .pill:hover { border-color: var(--ink-faint); color: var(--ink); }
 .pill__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
 
-/* the handwriting */
-.script { position: relative; width: 100%; display: flex; justify-content: center; min-height: 60px; }
-.script canvas { display: block; }
-.script__fallback {
-  margin: 0; font-size: clamp(52px, 9vw, 96px); font-weight: 600; letter-spacing: -0.035em; line-height: 1.05;
-  font-style: italic;
+/* the headline, typeset — with one pen stroke under the name */
+.hero__title {
+  margin: 26px 0 0;
+  font-size: clamp(56px, 10vw, 112px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  font-weight: 600;
 }
-.script.is-live .script__fallback { position: absolute; opacity: 0; pointer-events: none; }
-.hero .script { margin-top: 18px; min-height: clamp(96px, 14vw, 170px); }
+.swash-word { position: relative; display: inline-block; white-space: nowrap; }
+.swash {
+  position: absolute; left: -3%; bottom: -0.1em;
+  width: 106%; height: 0.2em;
+  overflow: visible; pointer-events: none;
+}
+.swash path {
+  fill: none; stroke: var(--accent); stroke-width: 0.075em; stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 320; stroke-dashoffset: 320;
+  transition: stroke-dashoffset 1.1s cubic-bezier(0.65, 0, 0.35, 1) 0.25s;
+}
+.no-js .swash path, .swash-word.is-drawn .swash path { stroke-dashoffset: 0; }
 
 .hero__sub {
-  margin: 4px 0 0;
+  margin: 28px 0 0;
   font-size: clamp(21px, 3vw, 30px);
   line-height: 1.3;
   color: var(--ink-soft);
@@ -114,9 +126,9 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; margin: 0; }
 }
 .ask__ghost.is-hidden { opacity: 0; pointer-events: none; }
 .ask__typed { overflow: hidden; text-overflow: clip; }
-.ask__nib { width: 26px; height: 26px; flex: none; margin: -8px 0 0 1px; transform-origin: 25% 20%; animation: pen 0.5s ease-in-out infinite alternate; }
-.ask__ghost.is-resting .ask__nib { animation: none; transform: translate(3px, -4px) rotate(-6deg); transition: transform 0.3s ease; }
-@keyframes pen { from { transform: translateY(0) rotate(0); } to { transform: translateY(1.5px) rotate(3deg); } }
+.ask__caret { width: 2px; height: 1.15em; margin-left: 2px; flex: none; border-radius: 1px; background: var(--accent); }
+.ask__ghost.is-resting .ask__caret { animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 .ask__row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 4px; }
 .ask__label { display: inline-flex; align-items: center; gap: 9px; font-size: 14.5px; color: var(--ink-mute); }
 .ask__go { padding: 12px 18px; }
@@ -387,9 +399,9 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; margin: 0; }
   background: radial-gradient(40% 50% at 50% 40%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
 }
 .finale__inner { text-align: center; display: flex; flex-direction: column; align-items: center; }
-.script--finale { min-height: clamp(90px, 12vw, 150px); }
-.script--finale .script__fallback { color: var(--finale-ink); }
-.finale p { margin: 8px 0 0; font-size: 19px; color: color-mix(in srgb, var(--finale-ink) 72%, transparent); }
+.finale__title { margin: 0; font-size: clamp(48px, 8vw, 88px); line-height: 1; letter-spacing: -0.035em; font-weight: 600; color: var(--finale-ink); }
+.finale__title .swash { bottom: -0.12em; }
+.finale p { margin: 26px 0 0; font-size: 19px; color: color-mix(in srgb, var(--finale-ink) 72%, transparent); }
 .finale__actions { margin-top: 30px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .btn--light { background: transparent; color: var(--finale-ink); border-color: color-mix(in srgb, var(--finale-ink) 30%, transparent); }
 .btn--light:hover { border-color: var(--finale-ink); }
@@ -411,10 +423,8 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; margin: 0; }
 }
 @media (max-width: 620px) {
   body { font-size: 16.5px; }
-  .hero .script { margin-top: 12px; min-height: 120px; }
   .ask { margin-top: 26px; padding: 14px 14px 12px 18px; border-radius: 20px; }
   .ask__field input, .ask__ghost { font-size: 18px; }
-  .ask__nib { width: 22px; height: 22px; }
   .ask__label { font-size: 14px; }
   .ask__more { display: none; }
   .ask__chips { gap: 6px; }

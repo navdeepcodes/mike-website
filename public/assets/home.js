@@ -5,41 +5,17 @@
   "use strict";
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const narrow = window.matchMedia("(max-width: 620px)");
 
-  // ── the handwritten greeting ──
-  function script(canvas, opts, when) {
-    if (!canvas || !window.MikePen) return null;
-    const wrap = canvas.parentElement;
-    const writer = new window.MikePen.Writer(canvas, opts());
-    const text = () => (narrow.matches && canvas.dataset.textNarrow) || canvas.dataset.text;
-    const go = () => {
-      writer.opts = Object.assign(writer.opts, opts());
-      return writer.write(text()).then(() => wrap.classList.add("is-written"));
-    };
-    wrap.classList.add("is-live");
-    if (when === "now") go();
-    else if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver((es) => {
-        if (es.some((e) => e.isIntersecting)) { io.disconnect(); go(); }
-      }, { threshold: 0.4 });
-      io.observe(wrap);
-    } else go();
-    let t = null;
-    window.addEventListener("resize", () => {
-      clearTimeout(t);
-      t = setTimeout(() => { if (wrap.classList.contains("is-written")) { writer.opts = Object.assign(writer.opts, opts()); writer.prepare(text()).then(() => writer.draw(Infinity, false)); } }, 150);
-    });
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => writer.refresh());
-    return writer;
+  // ── the underline under "Mike." and "hello.": drawn once, when seen ──
+  const swashes = document.querySelectorAll(".swash-word");
+  if ("IntersectionObserver" in window && !reduce) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add("is-drawn"); io.unobserve(e.target); }
+    }), { threshold: 0.6 });
+    swashes.forEach((w) => io.observe(w));
+  } else {
+    swashes.forEach((w) => w.classList.add("is-drawn"));
   }
-
-  const heroCap = () => (narrow.matches ? 40 : window.innerWidth < 1000 ? 64 : 82);
-  script(document.getElementById("hero-script"), () => ({ cap: heroCap(), speed: 1.15, weight: 1.15, maxWidth: 1000 }), "now");
-  script(document.getElementById("finale-script"), () => ({
-    cap: narrow.matches ? 44 : 70, speed: 1.1, weight: 1.15,
-    ink: getComputedStyle(document.documentElement).getPropertyValue("--finale-ink").trim() || "#f3f1ec",
-  }), "visible");
 
   // ── the Ask box: the nib types what you could ask ──
   const input = document.getElementById("ask-q");

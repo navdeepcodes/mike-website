@@ -87,18 +87,14 @@
     <div class="hero__glow" aria-hidden="true"></div>
     <div class="wrap hero__copy">
       <a class="pill" href="#download"><span class="pill__dot" aria-hidden="true"></span>Free early access for Windows</a>
-      <h1 class="sr-only">Hi, I'm Mike — the assistant that lives on your computer.</h1>
-      <div class="script" aria-hidden="true">
-        <canvas id="hero-script" data-text="Hi, I'm Mike." data-text-narrow="Hi, I'm&#10;Mike."></canvas>
-        <p class="script__fallback">Hi, I'm Mike.</p>
-      </div>
+      <h1 class="hero__title">Meet <span class="swash-word">Mike.<svg class="swash" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M6 17C70 7 170 5 294 12"/></svg></span></h1>
       <p class="hero__sub">The assistant that lives on your computer — and can actually use it.</p>
 
       <form class="ask" id="ask" action="/chat/" method="get">
         <label class="sr-only" for="ask-q">Ask Mike anything</label>
         <div class="ask__field">
           <input id="ask-q" name="q" type="text" maxlength="500" autocomplete="off" />
-          <div class="ask__ghost" aria-hidden="true"><span class="ask__typed"></span><svg class="nibmark ask__nib" aria-hidden="true"><use href="#nib"/></svg></div>
+          <div class="ask__ghost" aria-hidden="true"><span class="ask__typed"></span><span class="ask__caret"></span></div>
         </div>
         <div class="ask__row">
           <span class="ask__label"><span class="ask__live" aria-hidden="true"></span><span>Try Mike now<span class="ask__more"> — free, right in your browser</span></span></span>
@@ -362,11 +358,7 @@
   <!-- ── say hello ── -->
   <section class="finale">
     <div class="wrap finale__inner">
-      <div class="script script--finale" aria-hidden="true">
-        <canvas id="finale-script" data-text="Say hello."></canvas>
-        <p class="script__fallback">Say hello.</p>
-      </div>
-      <h2 class="sr-only">Say hello.</h2>
+      <h2 class="finale__title">Say <span class="swash-word">hello.<svg class="swash" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M6 17C70 7 170 5 294 12"/></svg></span></h2>
       <p>Mike is free, private, and waiting on your computer.</p>
       <div class="finale__actions">
         <a class="btn btn--accent" href="/chat/">Try Mike in your browser</a>
@@ -406,7 +398,6 @@
 </footer>
 
 <script src="/assets/site.js" defer></script>
-<script src="/assets/pen.js" defer></script>
 <script src="/assets/home.js" defer></script>
 </body>
 </html>
