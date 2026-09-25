@@ -161,3 +161,11 @@ test("/api/health says whether a key is set, never the key", async () => {
   assert.ok(!text.includes("secret"));
   assert.equal(JSON.parse(text).key, true);
 });
+
+test("a model that rejects a parameter is retried with a plainer request", async () => {
+  const f = nvidia([400, { content: "Plain answer." }]);
+  const data = await (await chat(req(ask("hi")), env(), f)).json();
+  assert.equal(data.reply, "Plain answer.");
+  assert.equal(f.calls[0].body.model, f.calls[1].body.model, "same model, second shape");
+  assert.ok(f.calls[0].body.chat_template_kwargs && !f.calls[1].body.chat_template_kwargs);
+});

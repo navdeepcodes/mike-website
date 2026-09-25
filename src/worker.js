@@ -141,54 +141,87 @@ export function clean(text) {
     .trim();
 }
 
-async function callModel(env, model, messages, fetchImpl) {
+// Request shapes, most capable first. Some hosted models reject parameters
+// others accept (the thinking switch, or tools), so a 400 falls back to a
+// plainer request before giving up on the model.
+const SHAPES = [
+  { tools: true, thinkingOff: true },
+  { tools: true, thinkingOff: false },
+  { tools: false, thinkingOff: false },
+];
+
+async function post(env, model, messages, shape, fetchImpl) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), MODEL_TIMEOUT_MS);
+  const body = {
+    model,
+    messages: [{ role: "system", content: SYSTEM }, ...messages],
+    temperature: 0.4,
+    max_tokens: LIMITS.maxTokens,
+    stream: false,
+  };
+  if (shape.tools) { body.tools = TOOLS; body.tool_choice = "auto"; }
+  // Answer straight away: no visible "thinking" for a website preview.
+  if (shape.thinkingOff) body.chat_template_kwargs = { enable_thinking: false };
   try {
-    // NVIDIA_URL can be overridden (any OpenAI-compatible endpoint) — used for
-    // local testing, or to move the preview to another provider.
-    const resp = await fetchImpl(env.CHAT_API_URL || NVIDIA_URL, {
+    // CHAT_API_URL can point at any OpenAI-compatible endpoint (local testing,
+    // or moving the preview to another provider).
+    return await fetchImpl(env.CHAT_API_URL || NVIDIA_URL, {
       method: "POST",
       signal: ctrl.signal,
       headers: { authorization: `Bearer ${apiKey(env)}`, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "system", content: SYSTEM }, ...messages],
-        tools: TOOLS,
-        tool_choice: "auto",
-        temperature: 0.4,
-        max_tokens: LIMITS.maxTokens,
-        stream: false,
-        // Answer straight away: no visible "thinking" for a website preview.
-        chat_template_kwargs: { enable_thinking: false },
-      }),
+      body: JSON.stringify(body),
     });
-    if (!resp.ok) {
-      const err = new Error(`${model}: HTTP ${resp.status}`);
-      err.status = resp.status;
-      throw err;
-    }
-    const data = await resp.json();
-    const msg = data?.choices?.[0]?.message || {};
-    const actions = (msg.tool_calls || [])
-      .map((c) => {
-        let args = {};
-        try {
-          args = typeof c.function?.arguments === "string" ? JSON.parse(c.function.arguments || "{}") : c.function?.arguments || {};
-        } catch {
-          args = {};
-        }
-        return describe(c.function?.name, args);
-      })
-      .filter(Boolean)
-      .slice(0, 4);
-    let reply = clean(msg.content);
-    if (!reply && actions.length) reply = "That needs your computer, and this preview can't reach it.";
-    if (!reply) throw new Error(`${model}: empty reply`);
-    return { reply, actions, model };
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function callModel(env, model, messages, fetchImpl) {
+  let resp = null;
+  for (const shape of SHAPES) {
+    resp = await post(env, model, messages, shape, fetchImpl);
+    if (resp.status !== 400 && resp.status !== 422) break;
+  }
+  if (!resp.ok) {
+    let detail = "";
+    try { detail = (await resp.text()).slice(0, 200); } catch { /* none */ }
+    const err = new Error(`${model}: HTTP ${resp.status} ${detail}`);
+    err.status = resp.status;
+    throw err;
+  }
+  const data = await resp.json();
+  const msg = data?.choices?.[0]?.message || {};
+  const actions = (msg.tool_calls || [])
+    .map((c) => {
+      let args = {};
+      try {
+        args = typeof c.function?.arguments === "string" ? JSON.parse(c.function.arguments || "{}") : c.function?.arguments || {};
+      } catch {
+        args = {};
+      }
+      return describe(c.function?.name, args);
+    })
+    .filter(Boolean)
+    .slice(0, 4);
+  let reply = clean(msg.content);
+  if (!reply && actions.length) reply = "That needs your computer, and this preview can't reach it.";
+  if (!reply) throw new Error(`${model}: empty reply`);
+  return { reply, actions, model };
+}
+
+/** /api/health?check=1: try each model once and report what NVIDIA said. */
+async function check(env, fetchImpl) {
+  const results = {};
+  for (const model of models(env)) {
+    try {
+      const r = await callModel(env, model, [{ role: "user", content: "Say hello in five words." }], fetchImpl);
+      results[model] = { ok: true, reply: r.reply.slice(0, 80) };
+    } catch (err) {
+      results[model] = { ok: false, error: String(err && err.message ? err.message : err).slice(0, 240) };
+    }
+  }
+  return results;
 }
 
 export async function chat(request, env, fetchImpl = fetch) {
@@ -238,7 +271,15 @@ export default {
     if (url.pathname === "/api/chat") return chat(request, env);
     // Is the preview configured? (Never reveals the key itself.)
     if (url.pathname === "/api/health") {
-      return json(200, { key: Boolean(apiKey(env)), models: models(env) });
+      const out = { key: Boolean(apiKey(env)), models: models(env) };
+      if (url.searchParams.get("check") && out.key) {
+        if (env.CHAT_LIMIT) {
+          const { success } = await env.CHAT_LIMIT.limit({ key: "health:" + (request.headers.get("cf-connecting-ip") || "local") });
+          if (!success) return json(429, { error: "busy" });
+        }
+        out.check = await check(env, fetch);
+      }
+      return json(200, out);
     }
     return env.ASSETS.fetch(request);
   },
