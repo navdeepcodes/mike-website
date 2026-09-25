@@ -136,11 +136,31 @@
     return { li, body };
   }
 
+  // Thinking: the nib writes what Mike is doing, in handwriting — as in the app.
+  const PHRASES = ["Thinking", "Working it out", "One moment", "Nearly there"];
   function thinking(body) {
     const t = el("span", "thinking");
-    t.appendChild(nib());
-    t.appendChild(el("span", "", "Thinking"));
     body.replaceChildren(t);
+    if (!window.MikePen || reduceMotion) {
+      t.appendChild(nib());
+      t.appendChild(el("span", "", "Thinking"));
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.setAttribute("aria-label", "Thinking");
+    canvas.setAttribute("role", "img");
+    t.classList.add("thinking--script");
+    t.appendChild(canvas);
+    const writer = new window.MikePen.Writer(canvas, { cap: 24, align: "left", speed: 1.3, maxWidth: 360, pad: 0.2, weight: 1.05 });
+    (async () => {
+      let i = 0;
+      while (canvas.isConnected) {
+        await writer.write(PHRASES[i++ % PHRASES.length] + "…");
+        if (!canvas.isConnected) break;
+        await new Promise((r) => setTimeout(r, 700));
+        await writer.fade(320);
+      }
+    })();
   }
 
   function tools(li, text) {

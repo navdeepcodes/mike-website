@@ -75,34 +75,47 @@
     <div class="nav__links">
       <a class="hide-sm" href="#features">What it does</a>
       <a class="hide-sm" href="#privacy">Privacy</a>
-      <a href="/chat/">Try Mike</a>
+      <a class="nav__try" href="/chat/"><span class="ask__live" aria-hidden="true"></span>Try Mike</a>
       <a class="btn btn--ink btn--sm" href="#download">Download</a>
     </div>
   </div>
 </nav>
 
 <main>
-  <!-- ── hero ── -->
+  <!-- ── hero: the nib writes, and you can ask right here ── -->
   <header class="hero">
+    <div class="hero__glow" aria-hidden="true"></div>
     <div class="wrap hero__copy">
       <a class="pill" href="#download"><span class="pill__dot" aria-hidden="true"></span>Free early access for Windows</a>
-      <h1>Meet Mike.</h1>
-      <p class="hero__sub">The assistant that lives on your computer — and can actually use it.</p>
-      <p class="hero__lede">Ask in plain words, typed or spoken. Mike opens your apps, finds and writes your files, reads your screen and fixes your code — and asks before changing anything that can't be undone.</p>
-      <div class="hero__actions">
-        <a class="btn btn--ink" href="#download" data-dl
-           data-win="https://github.com/navdeepcodes/NavAI/releases/download/v1.0.0/Mike-windows-1.0.0.zip"
-           data-mac="#download"
-           data-mac-label="Get Mike">
-          <svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5v9M6 9l4 4 4-4M4 16.5h12"/></svg>
-          <span data-dl-label>Download for Windows</span>
-        </a>
-        <a class="btn btn--ghost" href="/chat/">Try it in your browser</a>
+      <h1 class="sr-only">Hi, I'm Mike — the assistant that lives on your computer.</h1>
+      <div class="script" aria-hidden="true">
+        <canvas id="hero-script" data-text="Hi, I'm Mike." data-text-narrow="Hi, I'm&#10;Mike."></canvas>
+        <p class="script__fallback">Hi, I'm Mike.</p>
       </div>
-      <p class="hero__meta">Free · Windows 10 and 11 · Mike's AI runs on your computer through <a href="https://ollama.com" rel="noopener">Ollama</a></p>
+      <p class="hero__sub">The assistant that lives on your computer — and can actually use it.</p>
+
+      <form class="ask" id="ask" action="/chat/" method="get">
+        <label class="sr-only" for="ask-q">Ask Mike anything</label>
+        <div class="ask__field">
+          <input id="ask-q" name="q" type="text" maxlength="500" autocomplete="off" />
+          <div class="ask__ghost" aria-hidden="true"><span class="ask__typed"></span><svg class="nibmark ask__nib" aria-hidden="true"><use href="#nib"/></svg></div>
+        </div>
+        <div class="ask__row">
+          <span class="ask__label"><span class="ask__live" aria-hidden="true"></span><span>Try Mike now<span class="ask__more"> — free, right in your browser</span></span></span>
+          <button class="btn btn--ink ask__go" type="submit">Ask Mike
+            <svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg>
+          </button>
+        </div>
+      </form>
+      <div class="ask__chips">
+        <a href="/chat/?q=Explain%20Newton%27s%20second%20law%20with%20a%20simple%20example">Explain Newton's second law</a>
+        <a href="/chat/?q=Clean%20up%20my%20Downloads%20folder">Clean up my Downloads</a>
+        <a href="/chat/?q=Write%20a%20short%2C%20polite%20email%20asking%20my%20professor%20for%20a%20two-day%20extension">Email my professor</a>
+      </div>
+      <p class="hero__alt">Want the real thing? <a href="#download" data-dl data-win="https://github.com/navdeepcodes/NavAI/releases/download/v1.0.0/Mike-windows-1.0.0.zip" data-mac="#download" data-win-label="Download Mike for Windows" data-mac-label="Get Mike (Mac test build below)"><span data-dl-label>Download Mike for Windows</span></a> — free.</p>
     </div>
 
-    <div class="wrap">
+    <div class="wrap stage">
       <figure class="window reveal">
         <picture>
           <source srcset="/img/working-dark.webp" media="(prefers-color-scheme: dark)" />
@@ -110,8 +123,31 @@
                alt="Mike's window: a student asks Mike to open their Physics folder and write a summary, and Mike works through the steps — opening File Explorer, looking at the window, writing the file." />
         </picture>
       </figure>
+      <div class="float float--a" aria-hidden="true">
+        <span class="float__check"></span><span>Wrote <b>first_law_summary.md</b></span>
+      </div>
+      <div class="float float--b" aria-hidden="true">
+        <span class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span>“Hey Mike…”</span>
+      </div>
+      <div class="float float--c" aria-hidden="true">
+        <span class="float__stop"></span><span>Delete <b>old_notes.txt</b>?</span><span class="float__btns"><i>Don't</i><i class="is-danger">Delete</i></span>
+      </div>
+      <div class="float float--d" aria-hidden="true">
+        <svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg><span>Remembered: <b>exams start 12 Oct</b></span>
+      </div>
     </div>
   </header>
+
+  <!-- ── what people ask ── -->
+  <section class="asks" aria-label="Things you can ask Mike">
+    <p class="asks__title">Ask Mike to…</p>
+    <div class="marquee" data-marquee>
+      <div class="marquee__track"><a class="marquee__chip" href="/chat/?q=Summarise%20chapter%203%20of%20my%20physics%20PDF">Summarise chapter 3 of my physics PDF</a><a class="marquee__chip" href="/chat/?q=Why%20is%20my%20Python%20script%20crashing%3F">Why is my Python script crashing?</a><a class="marquee__chip" href="/chat/?q=Rename%20these%20screenshots%20by%20date">Rename these screenshots by date</a><a class="marquee__chip" href="/chat/?q=Make%20a%20study%20plan%20for%20my%20exams">Make a study plan for my exams</a><a class="marquee__chip" href="/chat/?q=Open%20Spotify%20and%20play%20something%20calm">Open Spotify and play something calm</a><a class="marquee__chip" href="/chat/?q=Turn%20my%20lecture%20notes%20into%20flashcards">Turn my lecture notes into flashcards</a><a class="marquee__chip" href="/chat/?q=Find%20the%20essay%20I%20wrote%20last%20week">Find the essay I wrote last week</a><a class="marquee__chip" href="/chat/?q=Explain%20this%20error%20in%20plain%20English">Explain this error in plain English</a></div>
+    </div>
+    <div class="marquee marquee--reverse" data-marquee>
+      <div class="marquee__track"><a class="marquee__chip" href="/chat/?q=Add%20a%20totals%20row%20to%20budget.xlsx">Add a totals row to budget.xlsx</a><a class="marquee__chip" href="/chat/?q=Email%20my%20professor%20about%20the%20extension">Email my professor about the extension</a><a class="marquee__chip" href="/chat/?q=Clean%20up%20my%20Downloads%20folder">Clean up my Downloads folder</a><a class="marquee__chip" href="/chat/?q=What%27s%20on%20my%20screen%20right%20now%3F">What's on my screen right now?</a><a class="marquee__chip" href="/chat/?q=Solve%20this%20integral%20step%20by%20step">Solve this integral step by step</a><a class="marquee__chip" href="/chat/?q=Start%20my%20dev%20server%20and%20check%20it%20works">Start my dev server and check it works</a><a class="marquee__chip" href="/chat/?q=Remember%20that%20my%20exams%20start%20on%2012%20October">Remember that my exams start on 12 October</a><a class="marquee__chip" href="/chat/?q=Write%20a%20cover%20letter%20from%20my%20resume">Write a cover letter from my resume</a></div>
+    </div>
+  </section>
 
   <!-- ── what it does ── -->
   <section class="section" id="features">
@@ -121,38 +157,113 @@
         <h2>One assistant for everything on your computer.</h2>
         <p>Mike doesn't just talk about your work — it works with the files, apps and projects you already have.</p>
       </div>
-      <div class="features">
-        <article class="feature reveal">
-          <span class="feature__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="13" rx="2"/><path d="M8 20.5h8M12 17.5v3"/></svg></span>
-          <h3>Your apps and screen</h3>
-          <p>Opens the apps you already use and works them the way you would — clicking, typing, and reading what's in a window.</p>
+
+      <div class="bento">
+        <article class="tile-b tile-b--wide reveal">
+          <div class="tile-b__copy">
+            <h3>It works on your computer</h3>
+            <p>Ask in plain words. Mike opens the apps, reads the files and does the steps — and shows you each one as it goes.</p>
+          </div>
+          <div class="demo-steps" id="demo-steps" aria-hidden="true">
+            <div class="demo-steps__ask"><span class="demo-steps__you">Summarise lecture 3 into my Physics folder</span></div>
+            <div class="demo-steps__card">
+              <div class="demo-steps__head"><span class="spin is-done"></span><b>Done</b><em class="demo-steps__timer">4s</em></div>
+              <ol class="demo-steps__list">
+                <li class="is-in is-done"><span class="dot"></span><span>Finding lecture-3.pdf</span></li>
+                <li class="is-in is-done"><span class="dot"></span><span>Reading lecture-3.pdf</span></li>
+                <li class="is-in is-done"><span class="dot"></span><span>Writing lecture-3-summary.md in Physics</span></li>
+              </ol>
+            </div>
+          </div>
         </article>
-        <article class="feature reveal">
-          <span class="feature__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 7a1.5 1.5 0 0 1 1.5-1.5h4.2l1.8 2.2H19a1.5 1.5 0 0 1 1.5 1.5v8.3A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5Z"/></svg></span>
-          <h3>Your files</h3>
-          <p>Finds files by name, reads PDFs, Word and PowerPoint, and writes and edits documents and spreadsheets — formulas included.</p>
+
+        <article class="tile-b reveal">
+          <div class="tile-b__copy">
+            <h3>Talk to it</h3>
+            <p>Say “Hey Mike”, or press <span class="kbd">Ctrl</span> <span class="kbd">Shift</span> <span class="kbd">Space</span> in any app. It can answer out loud.</p>
+          </div>
+          <div class="demo-voice" aria-hidden="true">
+            <span class="demo-voice__label">Listening</span>
+            <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
         </article>
-        <article class="feature reveal">
-          <span class="feature__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19.5V6a1.5 1.5 0 0 1 1.5-1.5H11v15H5.5A1.5 1.5 0 0 0 4 21M20 19.5V6a1.5 1.5 0 0 0-1.5-1.5H13v15h5.5A1.5 1.5 0 0 1 20 21"/></svg></span>
-          <h3>Studying</h3>
-          <p>Explains step by step, works maths out exactly instead of guessing, and turns your notes and slides into summaries.</p>
+
+        <article class="tile-b reveal">
+          <div class="tile-b__copy">
+            <h3>Study with it</h3>
+            <p>Step-by-step explanations, with maths worked out exactly — not guessed.</p>
+          </div>
+          <div class="demo-math" aria-hidden="true">
+            <div class="demo-math__q">A 3 kg cart is pushed with 12 N. Acceleration?</div>
+            <div class="demo-math__line">F = m · a</div>
+            <div class="demo-math__line">a = F ⁄ m = 12 N ⁄ 3 kg</div>
+            <div class="demo-math__ans">a = 4 m/s² <span>worked out exactly</span></div>
+          </div>
         </article>
-        <article class="feature reveal">
-          <span class="feature__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m8.5 7.5-5 4.5 5 4.5M15.5 7.5l5 4.5-5 4.5M13.5 5l-3 14"/></svg></span>
-          <h3>Code</h3>
-          <p>Works inside your projects: reads and edits code, runs commands, checks what broke, and connects to VS Code.</p>
+
+        <article class="tile-b reveal">
+          <div class="tile-b__copy">
+            <h3>Code with it</h3>
+            <p>Reads your project, edits the code, runs it and checks what broke.</p>
+          </div>
+          <div class="demo-code" aria-hidden="true">
+            <div class="demo-code__file">parse.py</div>
+            <code><span class="ln">41</span>  for i in range(len(rows)):</code>
+            <code class="del"><span class="ln">42</span>-     total += rows[i + 1]</code>
+            <code class="add"><span class="ln">42</span>+     total += rows[i]</code>
+            <div class="demo-code__ok"><span class="float__check"></span>Fixed the IndexError — tests pass</div>
+          </div>
         </article>
-        <article class="feature reveal">
-          <span class="feature__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v3.5"/></svg></span>
-          <h3>Voice</h3>
-          <p>Say “Hey Mike”, or press <span class="kbd">Ctrl</span> <span class="kbd">Shift</span> <span class="kbd">Space</span> from anywhere. Mike listens — and can answer out loud.</p>
+
+        <article class="tile-b reveal">
+          <div class="tile-b__copy">
+            <h3>Your files</h3>
+            <p>Finds them by name. Reads PDFs, Word and PowerPoint. Writes documents and spreadsheets.</p>
+          </div>
+          <div class="demo-files" aria-hidden="true">
+            <span class="file file--pdf"><b>PDF</b>lecture-3.pdf</span>
+            <span class="file file--doc"><b>DOC</b>essay-draft.docx</span>
+            <span class="file file--xls"><b>XLS</b>budget.xlsx</span>
+            <span class="file file--ppt"><b>PPT</b>seminar.pptx</span>
+          </div>
         </article>
-        <article class="feature reveal">
-          <span class="feature__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.8a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10-7.5 10Z"/></svg></span>
-          <h3>Memory</h3>
-          <p>Remembers what you ask it to — your courses, your deadlines, how you like things explained — and forgets on request.</p>
+
+        <article class="tile-b tile-b--half reveal">
+          <div class="tile-b__copy">
+            <h3>It remembers what matters</h3>
+            <p>Only what you ask it to — and it forgets on request.</p>
+          </div>
+          <div class="demo-memory" aria-hidden="true">
+            <span>Studying aeronautics at NMIT</span>
+            <span>Exams start 12 October</span>
+            <span>Likes step-by-step explanations</span>
+            <span>Uses VS Code</span>
+          </div>
+        </article>
+
+        <article class="tile-b tile-b--half reveal">
+          <div class="tile-b__copy">
+            <h3>Always one shortcut away</h3>
+            <p>Mike waits in the corner of your screen, ready from any app — without getting in the way.</p>
+          </div>
+          <div class="demo-corner" aria-hidden="true">
+            <div class="demo-corner__card">
+              <p>Done — your summary is in the Physics folder.</p>
+              <div class="demo-corner__row"><svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg><span>Ask Mike…</span></div>
+            </div>
+          </div>
         </article>
       </div>
+    </div>
+  </section>
+
+  <!-- ── in numbers ── -->
+  <section class="numbers" aria-label="Mike in numbers">
+    <div class="wrap numbers__row">
+      <div class="number reveal"><b>40+</b><span>real actions it can take on your computer</span></div>
+      <div class="number reveal"><b>0</b><span>analytics, trackers or ads</span></div>
+      <div class="number reveal"><b>100%</b><span>of your conversations stay on your computer</span></div>
+      <div class="number reveal"><b>Free</b><span>during early access</span></div>
     </div>
   </section>
 
@@ -179,29 +290,8 @@
     </div>
   </section>
 
-  <!-- ── try it ── -->
-  <section class="section" id="try">
-    <div class="wrap">
-      <div class="try reveal">
-        <span class="tile tile--xl" aria-hidden="true"><svg class="nibmark"><use href="#nib"/></svg></span>
-        <h2>Try Mike right now.</h2>
-        <p>Talk to Mike in your browser. When you ask for something that needs your computer, you'll see exactly what the desktop Mike would do.</p>
-        <form class="try__form" action="/chat/" method="get">
-          <label class="sr-only" for="try-q">Ask Mike</label>
-          <input id="try-q" name="q" type="text" maxlength="500" placeholder="Ask Mike anything…" autocomplete="off" />
-          <button class="btn btn--ink btn--sm" type="submit">Ask</button>
-        </form>
-        <div class="try__chips">
-          <a href="/chat/?q=Explain%20Newton%27s%20second%20law%20with%20a%20simple%20example">Explain Newton's second law</a>
-          <a href="/chat/?q=Clean%20up%20my%20Downloads%20folder">Clean up my Downloads</a>
-          <a href="/chat/?q=Write%20a%20short%2C%20polite%20email%20asking%20my%20professor%20for%20a%20two-day%20extension">Email my professor</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ── privacy ── -->
-  <section class="section section--raised" id="privacy">
+  <section class="section" id="privacy">
     <div class="wrap">
       <div class="section__head reveal">
         <p class="eyebrow">Privacy</p>
@@ -209,14 +299,17 @@
       </div>
       <div class="pillars">
         <div class="pillar reveal">
+          <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="12" rx="2"/><path d="M8 20h8M12 16.5V20"/><path d="M10 10.5l1.5 1.5 3-3"/></svg></span>
           <h3>Thinks on your computer</h3>
           <p>Mike's AI model runs on your own machine through Ollama. Your conversations, files, screen and voice are processed there — not on our servers.</p>
         </div>
         <div class="pillar reveal">
+          <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span>
           <h3>No tracking</h3>
           <p>No analytics, no telemetry, no ads. We don't receive your conversations or how you use Mike.</p>
         </div>
         <div class="pillar reveal">
+          <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg></span>
           <h3>An account is optional</h3>
           <p>Only your email, name and photo — so Mike knows you on another computer. Delete it any time, in one click.</p>
         </div>
@@ -226,7 +319,7 @@
   </section>
 
   <!-- ── download ── -->
-  <section class="section" id="download">
+  <section class="section section--raised" id="download">
     <div class="wrap">
       <div class="download reveal">
         <div class="download__head">
@@ -265,6 +358,22 @@
       </div>
     </div>
   </section>
+
+  <!-- ── say hello ── -->
+  <section class="finale">
+    <div class="wrap finale__inner">
+      <div class="script script--finale" aria-hidden="true">
+        <canvas id="finale-script" data-text="Say hello."></canvas>
+        <p class="script__fallback">Say hello.</p>
+      </div>
+      <h2 class="sr-only">Say hello.</h2>
+      <p>Mike is free, private, and waiting on your computer.</p>
+      <div class="finale__actions">
+        <a class="btn btn--accent" href="/chat/">Try Mike in your browser</a>
+        <a class="btn btn--light" href="#download">Download for Windows</a>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -297,5 +406,7 @@
 </footer>
 
 <script src="/assets/site.js" defer></script>
+<script src="/assets/pen.js" defer></script>
+<script src="/assets/home.js" defer></script>
 </body>
 </html>

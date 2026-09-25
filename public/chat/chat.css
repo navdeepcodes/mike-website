@@ -182,6 +182,8 @@
 
 /* thinking: the nib, writing */
 .thinking { display: inline-flex; align-items: center; gap: 10px; color: var(--ink-mute); font-style: italic; font-size: 16px; }
+.thinking--script { display: block; width: 360px; max-width: 100%; margin: -10px 0 -10px -4px; }
+.thinking--script canvas { display: block; }
 .thinking .nibmark { width: 22px; height: 22px; animation: write 1.3s ease-in-out infinite; transform-origin: 30% 20%; }
 @keyframes write {
   0% { transform: translate(0, 0) rotate(0deg); }
