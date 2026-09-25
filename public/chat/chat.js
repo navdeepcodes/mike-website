@@ -90,17 +90,8 @@
     return out.join("");
   }
 
-  // ── where "Get Mike" goes, by platform ──
-  function platform() {
-    const p = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "").toLowerCase();
-    const ua = navigator.userAgent || "";
-    if (/android|iphone|ipad|ipod/i.test(ua)) return "mobile";
-    if (p.includes("win") || /Windows/.test(ua)) return "win";
-    if (p.includes("mac") || /Mac OS X/.test(ua)) return "mac";
-    return "other";
-  }
-  const PLATFORM = platform();
-  const GET_LABEL = PLATFORM === "win" ? "Get Mike for Windows" : PLATFORM === "mac" ? "Get Mike for Mac" : "Get Mike for your computer";
+  // ── "Get Mike": Windows-only for now ──
+  const GET_LABEL = "Get Mike for Windows";
 
   // ── building the thread ──
   function el(tag, cls, text) {
@@ -370,7 +361,7 @@
   document.querySelectorAll(".starter").forEach((b) => b.addEventListener("click", () => submit(b.dataset.q)));
   document.querySelectorAll("[data-download]").forEach((a) => {
     if (a.classList.contains("bar__get")) return;
-    a.textContent = PLATFORM === "win" || PLATFORM === "mac" ? GET_LABEL + " — free" : "Get Mike — free";
+    a.textContent = GET_LABEL + " — free";
   });
 
   // a placeholder that fits on one line on a phone

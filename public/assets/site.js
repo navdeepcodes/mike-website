@@ -1,5 +1,5 @@
 // Mike — small, shared behaviour: the nav's hairline once you scroll, gentle
-// reveals, and download buttons that point at the visitor's platform.
+// reveals, and download buttons (Windows-only for now).
 (function () {
   "use strict";
 
@@ -27,19 +27,11 @@
     }
   }
 
-  // Download buttons: data-win / data-mac hold the real files; the label
-  // follows the platform. Phones get pointed at the computer versions.
-  const ua = navigator.userAgent || "";
-  const p = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "").toLowerCase();
-  const platform = /android|iphone|ipad|ipod/i.test(ua) ? "mobile"
-    : p.includes("win") || /Windows/.test(ua) ? "win"
-    : p.includes("mac") || /Mac OS X/.test(ua) ? "mac" : "other";
-  document.documentElement.dataset.platform = platform;
+  // Mike is Windows-only for now: every download button points at the
+  // Windows build, whatever the visitor is using.
   document.querySelectorAll("[data-dl]").forEach((a) => {
-    const target = platform === "mac" ? "mac" : "win";
-    if (a.dataset[target]) a.href = a.dataset[target];
+    if (a.dataset.win) a.href = a.dataset.win;
     const label = a.querySelector("[data-dl-label]") || a;
-    if (platform === "mac") label.textContent = a.dataset.macLabel || "Download for Mac";
-    else if (platform === "win") label.textContent = a.dataset.winLabel || "Download for Windows";
+    if (a.dataset.winLabel) label.textContent = a.dataset.winLabel;
   });
 })();

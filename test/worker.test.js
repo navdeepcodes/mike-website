@@ -144,3 +144,20 @@ test("NVIDIA's own limit reads as busy, not broken", async () => {
   assert.equal(res.status, 429);
   assert.deepEqual(await res.json(), { error: "busy" });
 });
+
+test("the key is found under common names, and models can be set without code", async () => {
+  const { apiKey, models } = await import("../src/worker.js");
+  assert.equal(apiKey({ NVIDIA_KEY: " k " }), "k");
+  assert.equal(apiKey({}), "");
+  assert.deepEqual(models({ CHAT_MODELS: "a/b, c/d" }), ["a/b", "c/d"]);
+  const f = nvidia([404, 404, { content: "Hello from the third." }]);
+  const data = await (await chat(req(ask("hi")), { NVIDIA_KEY: "x" }, f)).json();
+  assert.equal(data.reply, "Hello from the third.");
+});
+
+test("/api/health says whether a key is set, never the key", async () => {
+  const res = await worker.fetch(new Request("https://huddlecode.com/api/health"), { NVIDIA_API_KEY: "secret" });
+  const text = await res.text();
+  assert.ok(!text.includes("secret"));
+  assert.equal(JSON.parse(text).key, true);
+});

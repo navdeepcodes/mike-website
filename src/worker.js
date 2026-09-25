@@ -12,12 +12,31 @@
 
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
-// Fast first; the second is tried if the first errors or is slow.
+// Tried in order until one answers. All are on NVIDIA's free endpoints; a model
+// the catalogue has dropped fails fast (404) and the next is tried. Override
+// without touching code: set CHAT_MODELS (comma-separated) in the Worker's
+// Settings → Variables.
 export const MODELS = [
   "nvidia/nemotron-3.5-lightning-30b-a3b",
   "qwen/qwen3-next-80b-a3b-instruct",
+  "meta/llama-3.3-70b-instruct",
+  "meta/llama-3.1-70b-instruct",
 ];
-const MODEL_TIMEOUT_MS = 9000;
+const MODEL_TIMEOUT_MS = 8000;
+
+/** The key, under the names people commonly give it. */
+export function apiKey(env) {
+  for (const name of ["NVIDIA_API_KEY", "NVIDIA_KEY", "NVAPI_KEY", "NIM_API_KEY", "NVIDIA_NIM_API_KEY", "API_KEY"]) {
+    const v = env[name];
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return "";
+}
+
+export function models(env) {
+  const custom = String(env.CHAT_MODELS || "").split(",").map((m) => m.trim()).filter(Boolean);
+  return custom.length ? custom : MODELS;
+}
 
 export const LIMITS = {
   bodyBytes: 12000,
@@ -131,7 +150,7 @@ async function callModel(env, model, messages, fetchImpl) {
     const resp = await fetchImpl(env.CHAT_API_URL || NVIDIA_URL, {
       method: "POST",
       signal: ctrl.signal,
-      headers: { authorization: `Bearer ${env.NVIDIA_API_KEY}`, "content-type": "application/json", accept: "application/json" },
+      headers: { authorization: `Bearer ${apiKey(env)}`, "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify({
         model,
         messages: [{ role: "system", content: SYSTEM }, ...messages],
@@ -179,7 +198,7 @@ export async function chat(request, env, fetchImpl = fetch) {
   const origin = request.headers.get("origin");
   if (origin && new URL(origin).host !== new URL(request.url).host) return json(403, { error: "origin" });
 
-  if (!env.NVIDIA_API_KEY) return json(503, { error: "resting" });
+  if (!apiKey(env)) return json(503, { error: "resting" });
 
   const ip = request.headers.get("cf-connecting-ip") || "local";
   if (env.CHAT_LIMIT) {
@@ -199,7 +218,7 @@ export async function chat(request, env, fetchImpl = fetch) {
   if (!messages) return json(400, { error: "bad_request" });
 
   let throttled = false;
-  for (const model of MODELS) {
+  for (const model of models(env)) {
     try {
       return json(200, await callModel(env, model, messages, fetchImpl));
     } catch (err) {
@@ -217,6 +236,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/chat") return chat(request, env);
+    // Is the preview configured? (Never reveals the key itself.)
+    if (url.pathname === "/api/health") {
+      return json(200, { key: Boolean(apiKey(env)), models: models(env) });
+    }
     return env.ASSETS.fetch(request);
   },
 };

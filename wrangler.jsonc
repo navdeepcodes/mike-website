@@ -3,6 +3,8 @@
   "name": "mike-website",
   "main": "src/worker.js",
   "compatibility_date": "2026-09-16",
+  // Keep variables added in the Cloudflare dashboard when deploying from here.
+  "keep_vars": true,
   "observability": {
     "enabled": true
   },
