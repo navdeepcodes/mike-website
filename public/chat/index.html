@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+<title>Try Mike</title>
+<meta name="description" content="Talk to Mike in your browser — and see what the desktop Mike would do on your computer." />
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)" />
+<link rel="canonical" href="https://huddlecode.com/chat/" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Try Mike" />
+<meta property="og:description" content="Talk to Mike in your browser — and see what the desktop Mike would do on your computer." />
+<meta property="og:url" content="https://huddlecode.com/chat/" />
+<meta property="og:image" content="https://huddlecode.com/og-image.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/site.css" />
+<link rel="stylesheet" href="/chat/chat.css" />
+<script>document.documentElement.classList.remove("no-js")</script>
+</head>
+<body class="chat-body">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <mask id="nib-cut" maskUnits="userSpaceOnUse" x="-1" y="-1" width="2" height="2">
+      <path d="M0 0C.07 .13 .2 .3 .19 .46L.13 .68H-.13L-.19 .46C-.2 .3-.07 .13 0 0Z" fill="#fff"/>
+      <circle cy=".45" r=".045"/><rect x="-.011" y=".08" width=".022" height=".36"/>
+    </mask>
+    <symbol id="nib" viewBox="0 0 100 100">
+      <g transform="translate(24.76 17.69) rotate(-38) scale(120.588)">
+        <path d="M0 0C.07 .13 .2 .3 .19 .46L.13 .68H-.13L-.19 .46C-.2 .3-.07 .13 0 0Z" style="fill:var(--nib)" mask="url(#nib-cut)"/>
+        <path d="M-.1518 .6H.1518L.13 .68H-.13Z" style="fill:var(--collar)"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app" id="app">
+
+  <aside class="rail" aria-label="Mike">
+    <a class="brand rail__brand" href="/">
+      <svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg>
+      <span class="brand__name">Mike</span>
+    </a>
+    <button class="rail__new" type="button" data-new-chat>
+      <span class="rail__plus" aria-hidden="true">
+        <svg viewBox="0 0 20 20"><path d="M10 5v10M5 10h10"/></svg>
+      </span>
+      New chat
+    </button>
+    <div class="rail__spacer"></div>
+    <div class="getcard">
+      <span class="tile" aria-hidden="true"><svg class="nibmark"><use href="#nib"/></svg></span>
+      <h2>Mike, on your computer</h2>
+      <p>The desktop Mike opens your apps, works with your files, reads your screen — and your conversations stay on your computer.</p>
+      <a class="btn btn--ink btn--sm" href="/#download" data-download>Get Mike — free</a>
+    </div>
+    <p class="rail__note">This is a preview in your browser.</p>
+  </aside>
+
+  <section class="main">
+    <header class="bar">
+      <a class="brand bar__brand" href="/" aria-label="Mike home">
+        <svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg>
+        <span class="brand__name">Mike</span>
+      </a>
+      <span class="bar__title" id="title">New chat</span>
+      <span class="bar__tag">Preview</span>
+      <div class="bar__actions">
+        <button class="iconbtn" type="button" data-new-chat title="New chat" aria-label="New chat">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16h3l8.5-8.5a2.1 2.1 0 0 0-3-3L4 13v3Z"/><path d="M11 6l3 3"/></svg>
+        </button>
+        <a class="btn btn--ink btn--sm bar__get" href="/#download" data-download>Get Mike</a>
+      </div>
+    </header>
+
+    <div class="scroll" id="scroll">
+      <div class="column">
+        <section class="hello" id="hello">
+          <span class="tile tile--lg" aria-hidden="true"><svg class="nibmark"><use href="#nib"/></svg></span>
+          <h1 id="greeting">Hello.</h1>
+          <p>Ask me anything. When it needs your computer, I'll show you exactly what the desktop Mike would do.</p>
+          <div class="starters">
+            <button type="button" class="starter" data-q="Explain Newton's second law with a simple example">
+              <span class="starter__kind">Study</span>
+              <span class="starter__text">Explain Newton's second law simply</span>
+            </button>
+            <button type="button" class="starter" data-q="Write a short, polite email asking my professor for a two-day extension">
+              <span class="starter__kind">Write</span>
+              <span class="starter__text">Email my professor for an extension</span>
+            </button>
+            <button type="button" class="starter" data-q="Clean up my Downloads folder">
+              <span class="starter__kind">On your computer</span>
+              <span class="starter__text">Clean up my Downloads folder</span>
+            </button>
+            <button type="button" class="starter" data-q="Find my resume PDF and open it">
+              <span class="starter__kind">On your computer</span>
+              <span class="starter__text">Find my resume and open it</span>
+            </button>
+          </div>
+        </section>
+        <ol class="thread" id="thread" aria-live="polite" aria-label="Conversation"></ol>
+      </div>
+    </div>
+
+    <footer class="dock">
+      <form class="composer" id="composer" autocomplete="off">
+        <label class="sr-only" for="input">Message Mike</label>
+        <textarea id="input" rows="1" maxlength="500" placeholder="Ask Mike anything, or tell him what to do" enterkeyhint="send"></textarea>
+        <div class="composer__row">
+          <span class="composer__hint" id="hint">Enter to send · Shift+Enter for a new line</span>
+          <span class="composer__count" id="count" hidden></span>
+          <button class="send" id="send" type="submit" aria-label="Send" disabled>
+            <svg class="send__go" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5v-11M5.5 9 10 4.5 14.5 9"/></svg>
+            <svg class="send__stop" viewBox="0 0 20 20" aria-hidden="true"><rect x="6" y="6" width="8" height="8" rx="1.5"/></svg>
+          </button>
+        </div>
+      </form>
+      <p class="fine"><span class="fine__long">Mike can make mistakes. This preview runs on cloud models (Cloudflare Workers AI, with NVIDIA as backup), so what you type is sent there — <a href="/privacy/#preview">privacy</a>. The desktop Mike thinks on your own computer.</span><span class="fine__short">Mike can make mistakes · Preview runs in the cloud · <a href="/privacy/#preview">Privacy</a></span></p>
+    </footer>
+  </section>
+</div>
+<script src="/assets/site.js" defer></script>
+<script src="/assets/pen.js" defer></script>
+<script src="/chat/chat.js" defer></script>
+</body>
+</html>
