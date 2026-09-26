@@ -224,25 +224,6 @@
     li.replaceChildren(box);
   }
 
-  // ── reveal the answer word by word: quick, but alive ──
-  function reveal(body, text, done) {
-    if (reduceMotion || text.length > 1400) {
-      body.innerHTML = markdown(text);
-      done();
-      return;
-    }
-    const words = text.split(/(\s+)/);
-    let i = 0;
-    const step = () => {
-      i = Math.min(words.length, i + 3);
-      body.innerHTML = markdown(words.slice(0, i).join(""));
-      follow();
-      if (i < words.length) setTimeout(step, 16);
-      else done();
-    };
-    step();
-  }
-
   // ── scrolling: follow the answer unless the reader scrolled up ──
   let pinned = true;
   scroller.addEventListener("scroll", () => {
@@ -273,49 +254,89 @@
     app.classList.toggle("has-thread", turns.length > 0);
   }
 
-  // ── asking ──
+  // ── asking: the answer streams in as Mike writes it ──
   async function ask() {
     const { li, body } = addMike();
     thinking(body);
     follow(true);
     const controller = new AbortController();
     setBusy(controller);
-    let data = null;
-    let kind = null;
+    const fail = (kind) => {
+      notice(li, kind, kind === "busy" || kind === "resting" ? null : ask);
+      setBusy(null);
+      follow();
+    };
+    let res;
     try {
-      const res = await fetch("/api/chat", {
+      res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ messages: turns.slice(-MAX_TURNS) }),
         signal: controller.signal,
       });
-      try { data = await res.json(); } catch (_) { data = null; }
-      if (!res.ok || !data || typeof data.reply !== "string") {
-        kind = res.status === 429 ? "busy" : res.status === 503 ? "resting" : "failed";
+    } catch (err) {
+      if (err && err.name === "AbortError") { li.remove(); setBusy(null); return; }
+      return fail(navigator.onLine === false ? "offline" : "failed");
+    }
+    if (!res.ok || !res.body) {
+      return fail(res.status === 429 ? "busy" : res.status === 503 ? "resting" : "failed");
+    }
+
+    let text = "";
+    let actions = [];
+    let broke = false;
+    let painted = 0;
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
+      if (text.length === painted) return;
+      painted = text.length;
+      body.innerHTML = markdown(text);
+      follow();
+    };
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    try {
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf("\n")) !== -1) {
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 1);
+          if (!line) continue;
+          let ev;
+          try { ev = JSON.parse(line); } catch (_) { continue; }
+          if (ev.t === "text") {
+            text += ev.v;
+            if (!frame) frame = requestAnimationFrame(paint);
+          } else if (ev.t === "done") {
+            actions = Array.isArray(ev.actions) ? ev.actions : [];
+          } else if (ev.t === "error") {
+            broke = true;
+          }
+        }
       }
     } catch (err) {
       if (err && err.name === "AbortError") {
-        li.remove();
-        setBusy(null);
-        return;
+        // Stopped mid-answer: keep what was written.
+        if (!text) { li.remove(); setBusy(null); return; }
+      } else {
+        broke = true;
       }
-      kind = navigator.onLine === false ? "offline" : "failed";
     }
-    if (kind) {
-      notice(li, kind, kind === "busy" || kind === "resting" ? null : ask);
-      setBusy(null);
-      follow();
-      return;
-    }
-    const actions = Array.isArray(data.actions) ? data.actions : [];
-    turns.push({ role: "assistant", content: data.reply, actions });
+    if (frame) cancelAnimationFrame(frame);
+    paint();
+    if (!text) return fail("failed");
+    turns.push({ role: "assistant", content: text, actions });
     save();
-    reveal(body, data.reply, () => {
-      if (actions.length) steps(li, actions);
-      tools(li, data.reply);
-      setBusy(null);
-      follow();
-    });
+    if (actions.length) steps(li, actions);
+    if (broke) li.appendChild(el("p", "msg__cut", "The answer was cut short."));
+    tools(li, text);
+    setBusy(null);
+    follow();
   }
 
   function submit(text) {
@@ -361,7 +382,7 @@
   document.querySelectorAll(".starter").forEach((b) => b.addEventListener("click", () => submit(b.dataset.q)));
   document.querySelectorAll("[data-download]").forEach((a) => {
     if (a.classList.contains("bar__get")) return;
-    a.textContent = GET_LABEL + " — free";
+    a.textContent = GET_LABEL;
   });
 
   // a placeholder that fits on one line on a phone

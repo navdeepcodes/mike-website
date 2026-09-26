@@ -170,6 +170,7 @@
 }
 .prose pre code { background: none; border: 0; padding: 0; font-size: 14px; line-height: 1.55; }
 
+.msg__cut { margin: 8px 0 0; font-size: 14px; color: var(--ink-mute); font-style: italic; }
 .msg__tools { display: flex; gap: 4px; margin-top: 8px; opacity: 0; transition: opacity 0.15s ease; }
 .msg--mike:hover .msg__tools, .msg--mike:focus-within .msg__tools { opacity: 1; }
 @media (hover: none) { .msg__tools { opacity: 1; } }
