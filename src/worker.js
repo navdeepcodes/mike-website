@@ -18,11 +18,12 @@ const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 // Settings → Variables.
 export const MODELS = [
   "nvidia/nemotron-3.5-lightning-30b-a3b",
-  "qwen/qwen3-next-80b-a3b-instruct",
-  "meta/llama-3.3-70b-instruct",
-  "meta/llama-3.1-70b-instruct",
-];
-const MODEL_TIMEOUT_MS = 8000;
+  "qwen/qwen3.5-397b-a17b",
+  "nvidia/nemotron-3-super-120b-a12b",
+]
+// Free endpoints can take a while to warm up; a model that fails outright
+// (404, 410) is skipped at once, so only a slow one uses this budget.
+const MODEL_TIMEOUT_MS = 28000;
 
 /** The key, under the names people commonly give it. */
 export function apiKey(env) {
@@ -181,7 +182,7 @@ async function callModel(env, model, messages, fetchImpl) {
   let resp = null;
   for (const shape of SHAPES) {
     resp = await post(env, model, messages, shape, fetchImpl);
-    if (resp.status !== 400 && resp.status !== 422) break;
+    if (resp.status !== 400 && resp.status !== 422) break; // 404/410: gone — next model
   }
   if (!resp.ok) {
     let detail = "";
