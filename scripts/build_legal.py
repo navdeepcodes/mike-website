@@ -41,8 +41,9 @@ This section is about huddlecode.com, not the Mike app.
   advertising.
 - **The browser preview ("Try Mike").** Unlike the desktop app, the preview
   runs on a cloud AI model. When you send a message there, the conversation is
-  sent to NVIDIA's hosted AI service to generate Mike's reply, and NVIDIA's own
-  terms and privacy policy apply to it. We don't store preview conversations:
+  sent to a hosted AI service to generate Mike's reply: Cloudflare Workers AI
+  first, with NVIDIA's hosted models as a backup. That provider's own terms and
+  privacy policy apply to it. We don't store preview conversations:
   they're kept only in your browser tab and disappear when you close it. Your
   IP address is used, briefly, to limit how many messages can be sent each
   minute. Please don't enter anything sensitive in the preview.

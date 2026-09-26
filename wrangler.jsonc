@@ -15,6 +15,8 @@
     "run_worker_first": ["/api/*"],
     "not_found_handling": "404-page"
   },
+  // Cloudflare Workers AI: the preview's first, fastest model (free daily allowance).
+  "ai": { "binding": "AI" },
   // The live "Try Mike" preview: 20 messages a minute per IP address (a campus
   // shares one, so not lower). NVIDIA's own limit on the key is ~40 a minute.
   "ratelimits": [

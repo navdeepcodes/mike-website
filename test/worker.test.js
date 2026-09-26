@@ -224,3 +224,26 @@ test("every export is something the Workers runtime accepts", async () => {
       `export ${name} is a ${typeof value}; the runtime would refuse to start`);
   }
 });
+
+test("Workers AI answers first when the site has it, tools included", async () => {
+  const seen = [];
+  const AI = { run: async (model, input) => { seen.push({ model, tools: input.tools.length }); return { response: "Hi from Cloudflare." }; } };
+  const f = nvidia([{ content: "from nvidia" }]);
+  const data = await streamed(await chat(req(ask("hi")), env({ AI }), f));
+  assert.equal(data.reply, "Hi from Cloudflare.");
+  assert.match(seen[0].model, /^@cf\//);
+  assert.ok(seen[0].tools > 5);
+  assert.equal(f.calls.length, 0, "NVIDIA wasn't needed");
+});
+
+test("Workers AI tool calls become 'Mike would' steps", async () => {
+  const AI = { run: async () => ({ response: null, tool_calls: [{ name: "open_application", arguments: { name: "Spotify" } }] }) };
+  const data = await streamed(await chat(req(ask("open spotify")), env({ AI }), nvidia([{ content: "x" }])));
+  assert.equal(data.actions[0].title, "Open Spotify");
+});
+
+test("if Workers AI fails, NVIDIA answers", async () => {
+  const AI = { run: async () => { throw new Error("capacity"); } };
+  const data = await streamed(await chat(req(ask("hi")), env({ AI }), nvidia([{ content: "NVIDIA here." }])));
+  assert.equal(data.reply, "NVIDIA here.");
+});

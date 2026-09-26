@@ -34,9 +34,13 @@ export function apiKey(env) {
   return "";
 }
 
+/** Cloudflare Workers AI: runs beside the site, so it answers in seconds. */
+export const WORKERS_AI = { model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast" };
+
 export function models(env) {
   const custom = String(env.CHAT_MODELS || "").split(",").map((m) => m.trim()).filter(Boolean);
-  return custom.length ? custom : MODELS;
+  if (custom.length) return custom;
+  return env.AI ? [env.WORKERS_AI_MODEL || WORKERS_AI.model, ...MODELS] : MODELS;
 }
 
 export const LIMITS = {
@@ -222,8 +226,11 @@ async function check(env, fetchImpl) {
   for (const model of models(env)) {
     const t0 = Date.now();
     try {
-      const r = await callModel(env, model, [{ role: "user", content: "Say hello in five words." }], fetchImpl);
-      results[model] = { ok: true, ms: Date.now() - t0, reply: r.reply.slice(0, 80) };
+      const hello = [{ role: "user", content: "Say hello in five words." }];
+      let reply;
+      if (model.startsWith("@cf/") && env.AI) reply = await (await openWorkersAI(env, model, hello)).next();
+      else reply = (await callModel(env, model, hello, fetchImpl)).reply;
+      results[model] = { ok: true, ms: Date.now() - t0, reply: String(reply || "").slice(0, 80) };
     } catch (err) {
       results[model] = { ok: false, ms: Date.now() - t0, error: String(err && err.message ? err.message : err).slice(0, 240) };
     }
@@ -281,7 +288,7 @@ export async function chat(request, env, fetchImpl = fetch) {
 /** How long a model may take to start answering before a second one races it.
  *  (An object, not a bare number: the Workers runtime treats every export as
  *  a possible entry point and rejects plain values.) */
-export const TIMING = { HEDGE_MS: 5000 };
+export const TIMING = { HEDGE_MS: 3000 };
 const HEDGE_MS = TIMING.HEDGE_MS;
 const STREAM_TOTAL_MS = 45000;
 
@@ -389,6 +396,41 @@ async function open(env, model, messages, fetchImpl) {
   return stream;
 }
 
+/** A finished Workers AI answer, shaped like a Stream so the race can use it. */
+class Answer {
+  constructor(model, text, tools) {
+    this.model = model;
+    this.queue = text ? [text] : [];
+    this.sent = text.length;
+    this.tools = tools;
+    this.finished = true;
+  }
+  async next() { return this.queue.length ? this.queue.splice(0).join("") : null; }
+  started() { return this.queue.length > 0 || this.tools.length > 0; }
+  actions() { return Stream.prototype.actions.call(this); }
+  cancel() {}
+}
+
+async function openWorkersAI(env, model, messages) {
+  const tools = TOOLS.map((t) => ({ name: t.function.name, description: t.function.description, parameters: t.function.parameters }));
+  const out = await env.AI.run(model, {
+    messages: [{ role: "system", content: SYSTEM }, ...messages],
+    tools,
+    max_tokens: LIMITS.maxTokens,
+    temperature: 0.4,
+  });
+  const calls = (out && out.tool_calls) || [];
+  const shaped = calls.map((c) => {
+    const f = c.function || c;
+    const args = typeof f.arguments === "string" ? f.arguments : JSON.stringify(f.arguments || {});
+    return { name: f.name || "", args };
+  });
+  const text = clean(typeof out?.response === "string" ? out.response : "");
+  const answer = new Answer(model, text, shaped);
+  if (!answer.started()) throw new Error(`${model}: empty reply`);
+  return answer;
+}
+
 /**
  * Start the first model; if it hasn't begun answering within HEDGE_MS, start
  * the next one too, and use whichever answers first. A model that fails
@@ -410,7 +452,7 @@ export function race(env, messages, fetchImpl) {
       const model = list[i++];
       running++;
       const hedge = setTimeout(launch, HEDGE_MS);
-      open(env, model, messages, fetchImpl).then((stream) => {
+      (model.startsWith("@cf/") && env.AI ? openWorkersAI(env, model, messages) : open(env, model, messages, fetchImpl)).then((stream) => {
         clearTimeout(hedge);
         running--;
         if (won) { stream.cancel(); return; }
