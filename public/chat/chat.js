@@ -127,14 +127,25 @@
     return { li, body };
   }
 
-  // Thinking: the nib writes what Mike is doing, in handwriting — as in the app.
-  const PHRASES = ["Thinking", "Working it out", "One moment", "Nearly there"];
+  // Thinking: the nib writes what Mike is doing, in handwriting — the same
+  // thoughts as the app (ui/workspace/thinking.py). A long wait settles onto
+  // the last two, reassurance rather than fresh activity that isn't happening.
+  const THOUGHTS = [
+    "Weighing the possibilities", "Tracing the logic", "Distilling the essentials",
+    "Considering every angle", "Choosing the right words", "Sketching an approach",
+    "Reasoning it through", "Examining the details", "Gathering my thoughts",
+    "Refining the answer", "Mapping out a plan", "Connecting the threads",
+    "Composing a reply", "Reading between the lines",
+  ];
+  const REASSURANCE = ["Adding the final touches", "Almost ready"];
+  const LONG_WAIT_MS = 11000;
+  const WIDEST = THOUGHTS.concat(REASSURANCE).reduce((a, b) => (b.length > a.length ? b : a));
   function thinking(body) {
     const t = el("span", "thinking");
     body.replaceChildren(t);
     if (!window.MikePen || reduceMotion) {
       t.appendChild(nib());
-      t.appendChild(el("span", "", "Thinking"));
+      t.appendChild(el("span", "", "Gathering my thoughts"));
       return;
     }
     const canvas = document.createElement("canvas");
@@ -142,11 +153,22 @@
     canvas.setAttribute("role", "img");
     t.classList.add("thinking--script");
     t.appendChild(canvas);
-    const writer = new window.MikePen.Writer(canvas, { cap: 24, align: "left", speed: 1.3, maxWidth: 360, pad: 0.2, weight: 1.05 });
+    const writer = new window.MikePen.Writer(canvas, { cap: 24, align: "left", speed: 1.3, maxWidth: 360, pad: 0.2, weight: 1.05, fitTo: WIDEST });
     (async () => {
-      let i = 0;
+      const t0 = Date.now();
+      let last = -1, tail = 0;
       while (canvas.isConnected) {
-        await writer.write(PHRASES[i++ % PHRASES.length] + "…");
+        let text;
+        if (Date.now() - t0 >= LONG_WAIT_MS) {
+          text = REASSURANCE[tail++ % REASSURANCE.length];
+        } else {
+          let i;
+          do { i = Math.floor(Math.random() * THOUGHTS.length); } while (i === last);
+          last = i;
+          text = THOUGHTS[i];
+        }
+        canvas.setAttribute("aria-label", text);
+        await writer.write(text);
         if (!canvas.isConnected) break;
         await new Promise((r) => setTimeout(r, 700));
         await writer.fade(320);

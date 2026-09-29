@@ -114,7 +114,8 @@
   class Writer {
     /**
      * canvas: where to write. opts: { cap (px), lineGap, align ("center" |
-     * "left"), nib (px), speed (x), ink, wet, maxWidth }
+     * "left"), nib (px), speed (x), ink, wet, maxWidth, fitTo }
+     * fitTo: text to size against, so a set of phrases all write at one size
      */
     constructor(canvas, opts = {}) {
       this.canvas = canvas;
@@ -141,6 +142,7 @@
         return l;
       });
       this.duration = t;
+      this.fitWidth = this.opts.fitTo ? layout(glyphs, this.opts.fitTo).width : 0;
       this.fit();
       this.colours();
     }
@@ -149,7 +151,7 @@
       const o = this.opts;
       const box = this.canvas.parentElement.getBoundingClientRect();
       const avail = Math.max(120, Math.min(o.maxWidth || Infinity, box.width || this.canvas.clientWidth || 600));
-      const widest = Math.max(...this.lines.map((l) => l.width), 1);
+      const widest = Math.max(...this.lines.map((l) => l.width), this.fitWidth || 0, 1);
       let scale = o.cap / CAP;
       const need = widest * scale + 2 * o.cap * o.pad;
       if (need > avail) scale *= avail / need;
