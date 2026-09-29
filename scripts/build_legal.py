@@ -19,12 +19,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parent / "navai" / "docs" / "legal"
 
-LEGAL_VERSION = "2026-09-25"
+def _app_setting(name: str, fallback: str) -> str:
+    """VERSION / LEGAL_VERSION from the app's own config/settings.py, so the
+    site's copy of the policy carries the same version and date as the app's
+    (they were hardcoded here and fell behind)."""
+    settings = SRC.parent.parent / "config" / "settings.py"
+    try:
+        found = re.search(rf'^{name}\s*=\s*"([^"]+)"', settings.read_text(encoding="utf-8"), re.M)
+        return found.group(1) if found else fallback
+    except OSError:
+        return fallback
+
+
+LEGAL_VERSION = _app_setting("LEGAL_VERSION", "2026-09-25")
+_updated = date.fromisoformat(LEGAL_VERSION.split(".")[0])
 VALUES = {
     "publisher": "Huddlecode",
     "website": "https://huddlecode.com",
-    "version": "1.0.0",
-    "updated": date.fromisoformat(LEGAL_VERSION).strftime("%-d %B %Y"),
+    "version": _app_setting("VERSION", "1.0.0"),
+    # "%-d" is glibc-only; build the day by hand so this runs on Windows too.
+    "updated": f"{_updated.day} {_updated:%B %Y}",
     "data_dir": "%LOCALAPPDATA%\\Mike",
     "contact": "visit https://huddlecode.com",
     "account_terms": "You don't need an account to use Mike.",
