@@ -9,7 +9,7 @@ It's a Cloudflare Worker with static assets:
 | Path | What it is |
 |---|---|
 | `public/` | The site: home, `/chat/`, `/privacy/`, `/terms/`, 404, icons, screenshots |
-| `public/assets/site.css` | The design system shared by every page (light and dark) |
+| `public/assets/site.css` | The design system shared by every page (black and grey) |
 | `src/worker.js` | `/api/chat` — the preview's model call, rate limit and fallback. Everything else is static |
 | `scripts/build_legal.py` | Builds `/privacy/` and `/terms/` from the app's own `docs/legal/*.md` |
 | `test/` | Tests for the Worker (NVIDIA's API is replaced by a stand-in) |
@@ -57,4 +57,4 @@ After the app's Privacy Policy or Terms change:
 python3 scripts/build_legal.py ../NavAI/docs/legal
 ```
 
-Screenshots in `public/img/` are rendered from the real app (light and dark).
+Screenshots in `public/img/` are rendered from the real app, in greyscale.

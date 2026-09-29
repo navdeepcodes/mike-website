@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Mike — a personal assistant that lives on your computer</title>
 <meta name="description" content="Mike lives on your computer and can actually use it: it opens your apps, finds and writes files, reads your screen and fixes code — and asks before changing anything that can't be undone. Free for Windows." />
-<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#0a0a0a" />
 <link rel="canonical" href="https://huddlecode.com/" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
@@ -29,7 +28,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/assets/site.css" />
 <link rel="stylesheet" href="/assets/home.css" />
 <script>document.documentElement.classList.remove("no-js")</script>
@@ -63,6 +62,12 @@
         <path d="M-.1518 .6H.1518L.13 .68H-.13Z" style="fill:var(--collar)"/>
       </g>
     </symbol>
+    <symbol id="cursor" viewBox="0 0 24 24">
+      <path d="M5 3l14 8.2-6.1 1.3 3.6 6.9-2.6 1.4-3.6-6.9L5 18.3z" fill="#fff" stroke="#0a0a0a" stroke-width="1.4" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="tick" viewBox="0 0 20 20">
+      <path d="m5.5 10.5 3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
   </defs>
 </svg>
 
@@ -73,21 +78,20 @@
       <span class="brand__name">Mike</span>
     </a>
     <div class="nav__links">
-      <a class="hide-sm" href="#features">What it does</a>
+      <a class="hide-sm" href="#capabilities">Capabilities</a>
       <a class="hide-sm" href="#privacy">Privacy</a>
-      <a class="nav__try" href="/chat/"><span class="ask__live" aria-hidden="true"></span>Try Mike</a>
+      <a href="/chat/">Try Mike</a>
       <a class="btn btn--ink btn--sm" href="#download">Download</a>
     </div>
   </div>
 </nav>
 
 <main>
-  <!-- ── hero: the nib writes, and you can ask right here ── -->
+  <!-- ═══ hero ═══ -->
   <header class="hero">
-    <div class="hero__glow" aria-hidden="true"></div>
     <div class="wrap hero__copy">
-      <a class="pill" href="#download"><span class="pill__dot" aria-hidden="true"></span>Free early access for Windows</a>
-      <h1 class="hero__title">Meet <span class="swash-word">Mike.<svg class="swash" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M6 17C70 7 170 5 294 12"/></svg></span></h1>
+      <p class="hero__kicker">Early access&ensp;·&ensp;Free for Windows 10 and 11</p>
+      <h1 class="hero__title">Meet Mike.</h1>
       <p class="hero__sub">The assistant that lives on your computer — and can actually use it.</p>
 
       <form class="ask" id="ask" action="/chat/" method="get">
@@ -97,9 +101,9 @@
           <div class="ask__ghost" aria-hidden="true"><span class="ask__typed"></span><span class="ask__caret"></span></div>
         </div>
         <div class="ask__row">
-          <span class="ask__label"><span class="ask__live" aria-hidden="true"></span><span>Try Mike now<span class="ask__more"> — free, right in your browser</span></span></span>
-          <button class="btn btn--ink ask__go" type="submit">Ask Mike
-            <svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg>
+          <span class="ask__label">Try Mike in your browser<span class="ask__more"> — no download</span></span>
+          <button class="btn btn--ink ask__go" type="submit">Ask
+            <svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg>
           </button>
         </div>
       </form>
@@ -108,205 +112,398 @@
         <a href="/chat/?q=Clean%20up%20my%20Downloads%20folder">Clean up my Downloads</a>
         <a href="/chat/?q=Write%20a%20short%2C%20polite%20email%20asking%20my%20professor%20for%20a%20two-day%20extension">Email my professor</a>
       </div>
-      <p class="hero__alt">Want the real thing? <a href="#download" data-dl data-win="https://github.com/navdeepcodes/NavAI/releases/download/v1.0.0/Mike-windows-1.0.0.zip" data-win-label="Download Mike for Windows"><span data-dl-label>Download Mike for Windows</span></a> — free.</p>
     </div>
 
-    <div class="wrap stage">
-      <figure class="window reveal">
-        <picture>
-          <source srcset="/img/working-dark.webp" media="(prefers-color-scheme: dark)" />
-          <img src="/img/working-light.webp" width="1180" height="760"
-               alt="Mike's window: a student asks Mike to open their Physics folder and write a summary, and Mike works through the steps — opening File Explorer, looking at the window, writing the file." />
-        </picture>
+    <div class="wrap">
+      <figure class="window hero__shot">
+        <img src="/img/working-mono.webp" width="1180" height="760"
+             alt="Mike's window: a student asks Mike to open their Physics folder and write a summary, and Mike works through the steps — opening File Explorer, looking at the window, writing the file." />
       </figure>
-      <div class="float float--a" aria-hidden="true">
-        <span class="float__check"></span><span>Wrote <b>first_law_summary.md</b></span>
-      </div>
-      <div class="float float--b" aria-hidden="true">
-        <span class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span>“Hey Mike…”</span>
-      </div>
-      <div class="float float--c" aria-hidden="true">
-        <span class="float__stop"></span><span>Delete <b>old_notes.txt</b>?</span><span class="float__btns"><i>Don't</i><i class="is-danger">Delete</i></span>
-      </div>
-      <div class="float float--d" aria-hidden="true">
-        <svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg><span>Remembered: <b>exams start 12 Oct</b></span>
-      </div>
     </div>
   </header>
 
-  <!-- ── what people ask ── -->
-  <section class="asks" aria-label="Things you can ask Mike">
-    <p class="asks__title">Ask Mike to…</p>
-    <div class="marquee" data-marquee>
-      <div class="marquee__track"><a class="marquee__chip" href="/chat/?q=Summarise%20chapter%203%20of%20my%20physics%20PDF">Summarise chapter 3 of my physics PDF</a><a class="marquee__chip" href="/chat/?q=Why%20is%20my%20Python%20script%20crashing%3F">Why is my Python script crashing?</a><a class="marquee__chip" href="/chat/?q=Rename%20these%20screenshots%20by%20date">Rename these screenshots by date</a><a class="marquee__chip" href="/chat/?q=Make%20a%20study%20plan%20for%20my%20exams">Make a study plan for my exams</a><a class="marquee__chip" href="/chat/?q=Open%20Spotify%20and%20play%20something%20calm">Open Spotify and play something calm</a><a class="marquee__chip" href="/chat/?q=Turn%20my%20lecture%20notes%20into%20flashcards">Turn my lecture notes into flashcards</a><a class="marquee__chip" href="/chat/?q=Find%20the%20essay%20I%20wrote%20last%20week">Find the essay I wrote last week</a><a class="marquee__chip" href="/chat/?q=Explain%20this%20error%20in%20plain%20English">Explain this error in plain English</a></div>
-    </div>
-    <div class="marquee marquee--reverse" data-marquee>
-      <div class="marquee__track"><a class="marquee__chip" href="/chat/?q=Add%20a%20totals%20row%20to%20budget.xlsx">Add a totals row to budget.xlsx</a><a class="marquee__chip" href="/chat/?q=Email%20my%20professor%20about%20the%20extension">Email my professor about the extension</a><a class="marquee__chip" href="/chat/?q=Clean%20up%20my%20Downloads%20folder">Clean up my Downloads folder</a><a class="marquee__chip" href="/chat/?q=What%27s%20on%20my%20screen%20right%20now%3F">What's on my screen right now?</a><a class="marquee__chip" href="/chat/?q=Solve%20this%20integral%20step%20by%20step">Solve this integral step by step</a><a class="marquee__chip" href="/chat/?q=Start%20my%20dev%20server%20and%20check%20it%20works">Start my dev server and check it works</a><a class="marquee__chip" href="/chat/?q=Remember%20that%20my%20exams%20start%20on%2012%20October">Remember that my exams start on 12 October</a><a class="marquee__chip" href="/chat/?q=Write%20a%20cover%20letter%20from%20my%20resume">Write a cover letter from my resume</a></div>
-    </div>
-  </section>
-
-  <!-- ── what it does ── -->
-  <section class="section" id="features">
+  <!-- ═══ capabilities, played ═══ -->
+  <section class="section" id="capabilities">
     <div class="wrap">
       <div class="section__head reveal">
-        <p class="eyebrow">What Mike does</p>
-        <h2>One assistant for everything on your computer.</h2>
-        <p>Mike doesn't just talk about your work — it works with the files, apps and projects you already have.</p>
+        <p class="eyebrow">Capabilities</p>
+        <h2>It doesn't just answer.<br />It does the work.</h2>
+        <p>Ask in plain words. Mike picks up the right tools on your computer and shows you every step it takes.</p>
       </div>
 
-      <div class="bento">
-        <article class="tile-b tile-b--wide reveal">
-          <div class="tile-b__copy">
-            <h3>It works on your computer</h3>
-            <p>Ask in plain words. Mike opens the apps, reads the files and does the steps — and shows you each one as it goes.</p>
-          </div>
-          <div class="demo-steps" id="demo-steps" aria-hidden="true">
-            <div class="demo-steps__ask"><span class="demo-steps__you">Summarise lecture 3 into my Physics folder</span></div>
-            <div class="demo-steps__card">
-              <div class="demo-steps__head"><span class="spin is-done"></span><b>Done</b><em class="demo-steps__timer">4s</em></div>
-              <ol class="demo-steps__list">
-                <li class="is-in is-done"><span class="dot"></span><span>Finding lecture-3.pdf</span></li>
-                <li class="is-in is-done"><span class="dot"></span><span>Reading lecture-3.pdf</span></li>
-                <li class="is-in is-done"><span class="dot"></span><span>Writing lecture-3-summary.md in Physics</span></li>
+      <div class="showcase reveal" id="showcase">
+        <div class="caps" role="tablist" aria-label="What Mike can do">
+          <button class="cap" role="tab" data-for="apps"><span class="cap__n">01</span><span class="cap__t">Uses your apps</span><span class="cap__d">Opens apps, reads what's in their windows, then clicks, types, scrolls and presses shortcuts.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="files"><span class="cap__n">02</span><span class="cap__t">Finds your files</span><span class="cap__d">Searches your folders by name and opens the right one.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="docs"><span class="cap__n">03</span><span class="cap__t">Reads documents</span><span class="cap__d">PDF, Word, PowerPoint, CSV and JSON — summarised in plain words.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="sheets"><span class="cap__n">04</span><span class="cap__t">Works in spreadsheets</span><span class="cap__d">Reads and edits Excel files: totals, formulas, new rows.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="code"><span class="cap__n">05</span><span class="cap__t">Fixes code</span><span class="cap__d">Reads your project, edits the lines that matter and checks the fix — in VS Code too.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="term"><span class="cap__n">06</span><span class="cap__t">Runs commands</span><span class="cap__d">Starts servers and scripts, reads their output and checks they work.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="screen"><span class="cap__n">07</span><span class="cap__t">Sees your screen</span><span class="cap__d">Looks at what's in front of you and explains it.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="voice"><span class="cap__n">08</span><span class="cap__t">Listens and talks</span><span class="cap__d">Say “Hey Mike” or press Ctrl Shift Space. It can answer out loud.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="web"><span class="cap__n">09</span><span class="cap__t">Searches the web</span><span class="cap__d">Finds current information and opens pages in your browser.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="mail"><span class="cap__n">10</span><span class="cap__t">Sends email</span><span class="cap__d">Writes it through your Gmail, attachments included — and sends only after you say so.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="memory"><span class="cap__n">11</span><span class="cap__t">Remembers</span><span class="cap__d">Keeps what you ask it to, and forgets on request.</span><span class="cap__bar"></span></button>
+          <button class="cap" role="tab" data-for="maths"><span class="cap__n">12</span><span class="cap__t">Does exact maths</span><span class="cap__d">Calculates the answer instead of guessing it.</span><span class="cap__bar"></span></button>
+        </div>
+
+        <div class="stagewrap">
+          <div class="stage" aria-live="off">
+
+            <!-- 01 apps -->
+            <div class="scene" data-scene="apps" data-dur="7600" role="tabpanel" aria-label="Uses your apps">
+              <div class="mock">
+                <div class="mock__bar"><span>Notes</span></div>
+                <div class="notes">
+                  <aside class="notes__side">
+                    <div class="notes__item fx" data-t="1900"><b data-type="Exam topics" data-t="2100"></b><i>Just now</i></div>
+                    <div class="notes__item"><b>Lab report</b><i>Yesterday</i></div>
+                    <div class="notes__item"><b>Groceries</b><i>Monday</i></div>
+                    <span class="ref fx" data-t="400" style="left:8px;top:6px">el3</span>
+                  </aside>
+                  <div class="notes__main">
+                    <div class="notes__top"><span class="notes__btn fx-press" data-t="1650">New note<span class="ref fx" data-t="550">el7</span></span></div>
+                    <div class="notes__page">
+                      <h5 data-type="Exam topics" data-t="2100"></h5>
+                      <p data-type="Thermodynamics · Fluid mechanics · Aircraft structures" data-t="3100" data-speed="22"></p>
+                    </div>
+                    <span class="keys fx" data-t="5200"><kbd>Ctrl</kbd><kbd>S</kbd></span>
+                    <span class="toast fx" data-t="5700"><svg><use href="#tick"/></svg>Saved</span>
+                  </div>
+                </div>
+              </div>
+              <svg class="cursor" data-path="80%,80%@0 | .notes__btn@600 | .notes__page p@2100" data-click="1650"><use href="#cursor"/></svg>
+              <ol class="trail">
+                <li class="fx" data-t="300">Reading the Notes window</li>
+                <li class="fx" data-t="1600">Clicking “New note”</li>
+                <li class="fx" data-t="2100">Typing your topics</li>
+                <li class="fx" data-t="5200">Pressing Ctrl+S</li>
               </ol>
             </div>
-          </div>
-        </article>
 
-        <article class="tile-b reveal">
-          <div class="tile-b__copy">
-            <h3>Talk to it</h3>
-            <p>Say “Hey Mike”, or press <span class="kbd">Ctrl</span> <span class="kbd">Shift</span> <span class="kbd">Space</span> in any app. It can answer out loud.</p>
-          </div>
-          <div class="demo-voice" aria-hidden="true">
-            <span class="demo-voice__label">Listening</span>
-            <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
-        </article>
-
-        <article class="tile-b reveal">
-          <div class="tile-b__copy">
-            <h3>Study with it</h3>
-            <p>Step-by-step explanations, with maths worked out exactly — not guessed.</p>
-          </div>
-          <div class="demo-math" aria-hidden="true">
-            <div class="demo-math__q">A 3 kg cart is pushed with 12 N. Acceleration?</div>
-            <div class="demo-math__line">F = m · a</div>
-            <div class="demo-math__line">a = F ⁄ m = 12 N ⁄ 3 kg</div>
-            <div class="demo-math__ans">a = 4 m/s² <span>worked out exactly</span></div>
-          </div>
-        </article>
-
-        <article class="tile-b reveal">
-          <div class="tile-b__copy">
-            <h3>Code with it</h3>
-            <p>Reads your project, edits the code, runs it and checks what broke.</p>
-          </div>
-          <div class="demo-code" aria-hidden="true">
-            <div class="demo-code__file">parse.py</div>
-            <code><span class="ln">41</span>  for i in range(len(rows)):</code>
-            <code class="del"><span class="ln">42</span>-     total += rows[i + 1]</code>
-            <code class="add"><span class="ln">42</span>+     total += rows[i]</code>
-            <div class="demo-code__ok"><span class="float__check"></span>Fixed the IndexError — tests pass</div>
-          </div>
-        </article>
-
-        <article class="tile-b reveal">
-          <div class="tile-b__copy">
-            <h3>Your files</h3>
-            <p>Finds them by name. Reads PDFs, Word and PowerPoint. Writes documents and spreadsheets.</p>
-          </div>
-          <div class="demo-files" aria-hidden="true">
-            <span class="file file--pdf"><b>PDF</b>lecture-3.pdf</span>
-            <span class="file file--doc"><b>DOC</b>essay-draft.docx</span>
-            <span class="file file--xls"><b>XLS</b>budget.xlsx</span>
-            <span class="file file--ppt"><b>PPT</b>seminar.pptx</span>
-          </div>
-        </article>
-
-        <article class="tile-b tile-b--half reveal">
-          <div class="tile-b__copy">
-            <h3>It remembers what matters</h3>
-            <p>Only what you ask it to — and it forgets on request.</p>
-          </div>
-          <div class="demo-memory" aria-hidden="true">
-            <span>Studying aeronautics at NMIT</span>
-            <span>Exams start 12 October</span>
-            <span>Likes step-by-step explanations</span>
-            <span>Uses VS Code</span>
-          </div>
-        </article>
-
-        <article class="tile-b tile-b--half reveal">
-          <div class="tile-b__copy">
-            <h3>Always one shortcut away</h3>
-            <p>Mike waits in the corner of your screen, ready from any app — without getting in the way.</p>
-          </div>
-          <div class="demo-corner" aria-hidden="true">
-            <div class="demo-corner__card">
-              <p>Done — your summary is in the Physics folder.</p>
-              <div class="demo-corner__row"><svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg><span>Ask Mike…</span></div>
+            <!-- 02 files -->
+            <div class="scene" data-scene="files" data-dur="6800" role="tabpanel" aria-label="Finds your files">
+              <div class="mock">
+                <div class="mock__bar"><span>File Explorer</span></div>
+                <div class="explorer">
+                  <div class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="m13.2 13.2 3.3 3.3"/></svg><span data-type="essay" data-t="500" data-speed="90"></span></div>
+                  <div class="rows">
+                    <div class="row fx" data-t="1500"><span class="ftype">DOCX</span><b>essay-draft.docx</b><i>Documents › College</i></div>
+                    <div class="row fx fx-sel" data-t="1700" data-sel="2800"><span class="ftype">DOCX</span><b>essay-final.docx</b><i>Documents › College</i></div>
+                    <div class="row fx" data-t="1900"><span class="ftype">TXT</span><b>essay-notes.txt</b><i>Desktop</i></div>
+                    <div class="row fx" data-t="2100"><span class="ftype">PDF</span><b>essay-rubric.pdf</b><i>Downloads</i></div>
+                  </div>
+                </div>
+              </div>
+              <ol class="trail">
+                <li class="fx" data-t="400">Searching your folders for “essay”</li>
+                <li class="fx" data-t="2300">Found 4 files</li>
+                <li class="fx" data-t="2900">Reading essay-final.docx</li>
+              </ol>
             </div>
+
+            <!-- 03 documents -->
+            <div class="scene" data-scene="docs" data-dur="7400" role="tabpanel" aria-label="Reads documents">
+              <div class="doc">
+                <div class="page">
+                  <span class="page__tag">PDF · 14 pages</span>
+                  <h5>Lecture 3 — Thermodynamics</h5>
+                  <i style="width:92%"></i><i style="width:84%"></i><i style="width:88%"></i><i style="width:60%"></i>
+                  <i class="gap" style="width:90%"></i><i style="width:80%"></i><i style="width:86%"></i><i style="width:45%"></i>
+                  <i class="gap" style="width:88%"></i><i style="width:78%"></i>
+                  <span class="scan fx-run" data-t="200"></span>
+                </div>
+                <div class="summary fx" data-t="2400">
+                  <span class="summary__h">Summary</span>
+                  <ul>
+                    <li data-type="First law: ΔU = Q − W" data-t="2700"></li>
+                    <li data-type="Isothermal: ΔU = 0, so Q = W" data-t="3700"></li>
+                    <li data-type="Adiabatic: no heat in or out, Q = 0" data-t="4700"></li>
+                  </ul>
+                </div>
+              </div>
+              <ol class="trail">
+                <li class="fx" data-t="200">Reading Lecture 3.pdf</li>
+                <li class="fx" data-t="2500">Writing a summary</li>
+              </ol>
+            </div>
+
+            <!-- 04 spreadsheets -->
+            <div class="scene" data-scene="sheets" data-dur="6800" role="tabpanel" aria-label="Works in spreadsheets">
+              <div class="mock">
+                <div class="mock__bar"><span>budget.xlsx</span></div>
+                <div class="sheet">
+                  <div class="fbar"><b>B7</b><span data-type="=SUM(B2:B6)" data-t="1400" data-speed="60"></span></div>
+                  <table>
+                    <tr><th></th><th>A</th><th>B</th></tr>
+                    <tr><th>1</th><td class="h">Month</td><td class="h">Spent</td></tr>
+                    <tr><th>2</th><td>January</td><td class="n fx-hl" data-t="1400">3,200</td></tr>
+                    <tr><th>3</th><td>February</td><td class="n fx-hl" data-t="1400">2,850</td></tr>
+                    <tr><th>4</th><td>March</td><td class="n fx-hl" data-t="1400">4,100</td></tr>
+                    <tr><th>5</th><td>April</td><td class="n fx-hl" data-t="1400">3,600</td></tr>
+                    <tr><th>6</th><td>May</td><td class="n fx-hl" data-t="1400">2,950</td></tr>
+                    <tr class="total"><th>7</th><td>Total</td><td class="n cell-sel"><span class="fx" data-t="2800">16,700</span></td></tr>
+                  </table>
+                </div>
+              </div>
+              <ol class="trail">
+                <li class="fx" data-t="300">Reading budget.xlsx</li>
+                <li class="fx" data-t="1400">Adding a total in B7</li>
+                <li class="fx" data-t="3200">Saved budget.xlsx</li>
+              </ol>
+            </div>
+
+            <!-- 05 code -->
+            <div class="scene" data-scene="code" data-dur="7600" role="tabpanel" aria-label="Fixes code">
+              <div class="mock mock--code">
+                <div class="mock__bar"><span>parse.py</span></div>
+                <div class="editor">
+                  <code><i>40</i>def total(rows):</code>
+                  <code><i>41</i>    total = 0</code>
+                  <code><i>42</i>    for i in range(len(rows)):</code>
+                  <code class="line-bad fx-flag" data-t="700" data-gone="2300"><i>43</i>        total += rows[i + 1]<em class="err">IndexError</em></code>
+                  <code class="line-new fx-grow" data-t="2600"><i>43</i>        total += rows[i]</code>
+                  <code><i>44</i>    return total</code>
+                </div>
+                <div class="console">
+                  <code data-type="$ python -m pytest" data-t="3900" data-speed="40"></code>
+                  <code class="fx" data-t="5100"><svg><use href="#tick"/></svg>12 passed in 0.41s</code>
+                </div>
+              </div>
+              <ol class="trail">
+                <li class="fx" data-t="300">Reading parse.py</li>
+                <li class="fx" data-t="2400">Fixing line 43</li>
+                <li class="fx" data-t="3900">Running the tests</li>
+              </ol>
+            </div>
+
+            <!-- 06 terminal -->
+            <div class="scene" data-scene="term" data-dur="6800" role="tabpanel" aria-label="Runs commands">
+              <div class="mock mock--code">
+                <div class="mock__bar"><span>Terminal — my-site</span></div>
+                <div class="console console--tall">
+                  <code data-type="$ npm run dev" data-t="400" data-speed="55"></code>
+                  <code class="dim fx" data-t="1500">&gt; my-site@1.0.0 dev</code>
+                  <code class="dim fx" data-t="1700">&gt; vite</code>
+                  <code class="fx" data-t="2300">  VITE ready in 412 ms</code>
+                  <code class="fx" data-t="2600">  ➜  Local:   http://localhost:5173/</code>
+                </div>
+                <div class="check fx" data-t="3900"><svg><use href="#tick"/></svg><span><b>localhost:5173</b> responds — 200 OK</span></div>
+              </div>
+              <ol class="trail">
+                <li class="fx" data-t="300">Starting npm run dev in the background</li>
+                <li class="fx" data-t="3000">Checking localhost:5173</li>
+                <li class="fx" data-t="4100">It's running</li>
+              </ol>
+            </div>
+
+            <!-- 07 screen -->
+            <div class="scene" data-scene="screen" data-dur="7200" role="tabpanel" aria-label="Sees your screen">
+              <div class="desk">
+                <div class="desk__win desk__win--a"><span class="desk__bar"></span><i style="width:70%"></i><i style="width:52%"></i><i class="squig" style="width:64%"></i><i style="width:40%"></i><i style="width:58%"></i></div>
+                <div class="desk__win desk__win--b"><span class="desk__bar"></span><i style="width:80%"></i><i style="width:60%"></i></div>
+                <span class="frame fx" data-t="300"><b></b><b></b><b></b><b></b></span>
+                <span class="scan scan--wide fx-run" data-t="400"></span>
+              </div>
+              <div class="bubble bubble--mike fx" data-t="2200">
+                <svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg>
+                <p data-type="You're in VS Code. Line 43 of parse.py throws an IndexError — rows[i + 1] runs one past the end of the list." data-t="2400" data-speed="18"></p>
+              </div>
+              <ol class="trail">
+                <li class="fx" data-t="300">Looking at your screen</li>
+              </ol>
+            </div>
+
+            <!-- 08 voice -->
+            <div class="scene" data-scene="voice" data-dur="7000" role="tabpanel" aria-label="Listens and talks">
+              <div class="voice">
+                <span class="voice__label"><span class="fx-off" data-t="0" data-gone="3300">Listening…</span><span class="fx" data-t="3500">Speaking</span></span>
+                <div class="wave fx-run" data-t="200"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <p class="voice__heard" data-type="“Hey Mike, open my Physics notes.”" data-t="700" data-speed="42"></p>
+                <div class="bubble bubble--mike fx" data-t="3400"><svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg><p>Opening your Physics notes.</p></div>
+                <span class="voice__keys">or press <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>Space</kbd> in any app</span>
+              </div>
+            </div>
+
+            <!-- 09 web -->
+            <div class="scene" data-scene="web" data-dur="6800" role="tabpanel" aria-label="Searches the web">
+              <div class="mock">
+                <div class="mock__bar"><span>Browser</span></div>
+                <div class="web">
+                  <div class="search search--pill"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="m13.2 13.2 3.3 3.3"/></svg><span data-type="first law of thermodynamics explained" data-t="400" data-speed="34"></span></div>
+                  <div class="result fx" data-t="2000"><i>Lecture notes</i><b>The first law of thermodynamics, explained</b><span></span><span style="width:70%"></span></div>
+                  <div class="result fx" data-t="2250"><i>Physics guide</i><b>Worked examples: isothermal expansion</b><span></span><span style="width:55%"></span></div>
+                  <div class="result fx" data-t="2500"><i>Course reference</i><b>Heat, work and internal energy</b><span></span><span style="width:62%"></span></div>
+                </div>
+              </div>
+              <ol class="trail">
+                <li class="fx" data-t="300">Searching the web</li>
+                <li class="fx" data-t="2800">Reading the top results</li>
+              </ol>
+            </div>
+
+            <!-- 10 email -->
+            <div class="scene" data-scene="mail" data-dur="7800" role="tabpanel" aria-label="Sends email">
+              <div class="mock">
+                <div class="mock__bar"><span>New email</span></div>
+                <div class="mail">
+                  <div class="mail__f"><i>To</i><span>Prof. Sharma</span></div>
+                  <div class="mail__f"><i>Subject</i><span data-type="Request for a two-day extension" data-t="400" data-speed="30"></span></div>
+                  <p class="mail__body" data-type="Dear Prof. Sharma, I've been unwell this week and I'm behind on the lab report. Could I please submit it on Friday instead of Wednesday? Thank you." data-t="1400" data-speed="12"></p>
+                </div>
+              </div>
+              <div class="confirm fx" data-t="3900" data-gone="5600">
+                <p class="confirm__h">Send this email to Prof. Sharma?</p>
+                <p class="confirm__s">Once it's sent, it can't be taken back.</p>
+                <div class="confirm__row"><span class="cbtn">Don't send</span><span class="cbtn cbtn--go fx-press" data-t="5300">Send</span></div>
+              </div>
+              <svg class="cursor" data-path="40%,96%@0 | .cbtn--go@4500" data-click="5300"><use href="#cursor"/></svg>
+              <span class="toast toast--center fx" data-t="5800"><svg><use href="#tick"/></svg>Sent</span>
+              <ol class="trail">
+                <li class="fx" data-t="300">Writing the email</li>
+                <li class="fx" data-t="3900">Waiting for your OK</li>
+                <li class="fx" data-t="5800">Sent</li>
+              </ol>
+            </div>
+
+            <!-- 11 memory -->
+            <div class="scene" data-scene="memory" data-dur="7200" role="tabpanel" aria-label="Remembers">
+              <div class="chatmini">
+                <div class="bubble bubble--you fx" data-t="200">Remember that my exams start on 12 October.</div>
+                <div class="bubble bubble--mike fx" data-t="1100"><svg class="nibmark" aria-hidden="true"><use href="#nib"/></svg><p>Got it — I'll remember that.</p></div>
+                <div class="bubble bubble--you fx" data-t="3600">Forget my old timetable.</div>
+              </div>
+              <div class="memory">
+                <span class="memory__h">Mike remembers</span>
+                <span class="mem">Studies aeronautics</span>
+                <span class="mem">Prefers step-by-step answers</span>
+                <span class="mem fx-out" data-t="4600">Old timetable: labs on Monday</span>
+                <span class="mem mem--new fx" data-t="1600">Exams start 12 October</span>
+              </div>
+            </div>
+
+            <!-- 12 maths -->
+            <div class="scene" data-scene="maths" data-dur="6400" role="tabpanel" aria-label="Does exact maths">
+              <div class="maths">
+                <p class="maths__q">A 3 kg cart is pushed with a force of 12 N. What's its acceleration?</p>
+                <p class="maths__l fx" data-t="800">F = m · a</p>
+                <p class="maths__l fx" data-t="1600">a = F ÷ m = 12 N ÷ 3 kg</p>
+                <p class="maths__a fx" data-t="2600">a = 4 m/s²</p>
+                <span class="maths__b fx" data-t="3200"><svg><use href="#tick"/></svg>Calculated, not guessed</span>
+              </div>
+              <ol class="trail">
+                <li class="fx" data-t="1600">Calculating 12 ÷ 3</li>
+              </ol>
+            </div>
+
           </div>
+          <p class="stage__caption" aria-hidden="true"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ every action ═══ -->
+  <section class="section section--rule" id="everything">
+    <div class="wrap">
+      <div class="section__head reveal">
+        <p class="eyebrow">Everything Mike can do</p>
+        <h2>Forty-four actions, in plain words.</h2>
+        <p>Each one is a real tool built into the app — not a prompt trick. You can switch any group off in Settings.</p>
+      </div>
+
+      <div class="inventory">
+        <article class="group reveal" style="--i:0">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="13" rx="2"/><path d="M3.5 8.5h17"/></svg><h3>Apps and windows</h3><span>8</span></header>
+          <ul><li>Open any app</li><li>Switch to a window</li><li>List what's open</li><li>Read buttons, fields and text</li><li>Click</li><li>Type</li><li>Press keyboard shortcuts</li><li>Scroll</li></ul>
+        </article>
+        <article class="group reveal" style="--i:1">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg><h3>Files and folders</h3><span>10</span></header>
+          <ul><li>Search files by name</li><li>List a folder</li><li>Read a file</li><li>Read part of a long file</li><li>Create files</li><li>Create folders</li><li>Write a file</li><li>Edit a file</li><li>Make several edits at once</li><li>Delete — after asking</li></ul>
+        </article>
+        <article class="group reveal" style="--i:2">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M10 12h5M10 15.5h5"/></svg><h3>Documents and numbers</h3><span>4</span></header>
+          <ul><li>Read PDF, Word, PowerPoint, CSV and JSON</li><li>Read spreadsheets</li><li>Edit spreadsheets</li><li>Calculate exactly</li></ul>
+        </article>
+        <article class="group reveal" style="--i:0">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5.5l-3 13"/></svg><h3>Code and projects</h3><span>7</span></header>
+          <ul><li>Summarise a project</li><li>Map its folders</li><li>Search the code</li><li>Check syntax</li><li>See what you're looking at in VS Code</li><li>Open a file in VS Code</li><li>Apply an edit in VS Code</li></ul>
+        </article>
+        <article class="group reveal" style="--i:1">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="m7.5 9.5 3 2.5-3 2.5M12.5 15h4"/></svg><h3>Terminal and servers</h3><span>7</span></header>
+          <ul><li>Run a command</li><li>Start a server in the background</li><li>List running processes</li><li>Read their output</li><li>Stop a process</li><li>Check a web address responds</li><li>Check a port is open</li></ul>
+        </article>
+        <article class="group reveal" style="--i:2">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17"/></svg><h3>Web and email</h3><span>4</span></header>
+          <ul><li>Open your browser</li><li>Open a link</li><li>Search the web</li><li>Send email with attachments — after asking</li></ul>
+        </article>
+        <article class="group reveal" style="--i:0">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="11" rx="1.5"/><path d="M8 20h8M12 16.5V20"/><circle cx="12" cy="11" r="2.2"/></svg><h3>Your screen</h3><span>1</span></header>
+          <ul><li>See the screen and describe it</li></ul>
+        </article>
+        <article class="group reveal" style="--i:1">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10a4.2 4.2 0 0 1 7.5-2.6 4.2 4.2 0 0 1 7.5 2.6c0 5.4-7.5 10-7.5 10z"/></svg><h3>Memory</h3><span>3</span></header>
+          <ul><li>Remember something</li><li>Recall it later</li><li>Forget it</li></ul>
+        </article>
+        <article class="group group--voice reveal" style="--i:2">
+          <header><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v3"/></svg><h3>Voice</h3><span>Built in</span></header>
+          <ul><li>Wake it with “Hey Mike”</li><li>Or press <span class="kbd">Ctrl</span> <span class="kbd">Shift</span> <span class="kbd">Space</span></li><li>Hear answers out loud</li></ul>
         </article>
       </div>
     </div>
   </section>
 
-  <!-- ── in numbers ── -->
-  <section class="numbers" aria-label="Mike in numbers">
-    <div class="wrap numbers__row">
-      <div class="number reveal"><b>40+</b><span>real actions it can take on your computer</span></div>
-      <div class="number reveal"><b>0</b><span>analytics, trackers or ads</span></div>
-      <div class="number reveal"><b>100%</b><span>of your conversations stay on your computer</span></div>
-      <div class="number reveal"><b>Free</b><span>during early access</span></div>
-    </div>
-  </section>
-
-  <!-- ── you stay in charge ── -->
-  <section class="section section--raised">
+  <!-- ═══ you stay in charge ═══ -->
+  <section class="section section--rule">
     <div class="wrap split">
       <div class="split__copy reveal">
         <p class="eyebrow">You stay in charge</p>
         <h2>Mike asks before anything it can't take back.</h2>
         <ul class="checks">
-          <li><strong>Deleting, overwriting, sending</strong> — each waits for your OK, in plain words.</li>
-          <li><strong>Every change is recorded</strong> in Activity, and changes to files can be undone.</li>
-          <li><strong>Switch abilities off</strong> — web, email, commands, files — in Settings → Permissions.</li>
-          <li><strong>Stop Mike any time</strong> with <span class="kbd">Esc</span>.</li>
+          <li><svg><use href="#tick"/></svg><span><strong>Deleting, overwriting, sending</strong> — each waits for your OK, in plain words.</span></li>
+          <li><svg><use href="#tick"/></svg><span><strong>Every change is recorded</strong> in Activity, and changes to text files can be undone.</span></li>
+          <li><svg><use href="#tick"/></svg><span><strong>Switch abilities off</strong> — web, email, commands, files — in Settings.</span></li>
+          <li><svg><use href="#tick"/></svg><span><strong>Stop Mike any time</strong> with <span class="kbd">Esc</span>.</span></li>
         </ul>
       </div>
-      <figure class="window window--small reveal">
-        <picture>
-          <source srcset="/img/confirm-dark.webp" media="(prefers-color-scheme: dark)" />
-          <img src="/img/confirm-light.webp" width="1180" height="760" loading="lazy"
-               alt="Mike asking for permission: “Mike wants to make a permanent change — Delete old_notes.txt. This can't be undone.” with Don't and Delete buttons." />
-        </picture>
-      </figure>
+      <div class="guard reveal" aria-hidden="true">
+        <div class="guard__ask">
+          <p class="guard__k">Mike wants to make a permanent change</p>
+          <p class="guard__h">Delete <b>old_notes.txt</b></p>
+          <p class="guard__s">This can't be undone.</p>
+          <div class="confirm__row"><span class="cbtn">Don't</span><span class="cbtn cbtn--danger">Delete</span></div>
+        </div>
+        <div class="guard__log">
+          <p class="guard__k">Activity</p>
+          <div class="logrow"><span>Edited <b>parse.py</b></span><em>Undo</em></div>
+          <div class="logrow"><span>Wrote <b>summary.md</b></span><em>Undo</em></div>
+          <div class="logrow"><span>Sent an email to <b>Prof. Sharma</b></span><i>You approved</i></div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- ── privacy ── -->
-  <section class="section" id="privacy">
+  <!-- ═══ privacy ═══ -->
+  <section class="section section--rule" id="privacy">
     <div class="wrap">
       <div class="section__head reveal">
         <p class="eyebrow">Privacy</p>
         <h2>Private by design, and plain about it.</h2>
       </div>
       <div class="pillars">
-        <div class="pillar reveal">
-          <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="12" rx="2"/><path d="M8 20h8M12 16.5V20"/><path d="M10 10.5l1.5 1.5 3-3"/></svg></span>
+        <div class="pillar reveal" style="--i:0">
+          <p class="pillar__n">Local</p>
           <h3>Thinks on your computer</h3>
           <p>Mike's AI model runs on your own machine through Ollama. Your conversations, files, screen and voice are processed there — not on our servers.</p>
         </div>
-        <div class="pillar reveal">
-          <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span>
+        <div class="pillar reveal" style="--i:1">
+          <p class="pillar__n">Zero</p>
           <h3>No tracking</h3>
           <p>No analytics, no telemetry, no ads. We don't receive your conversations or how you use Mike.</p>
         </div>
-        <div class="pillar reveal">
-          <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg></span>
-          <h3>An account is optional</h3>
+        <div class="pillar reveal" style="--i:2">
+          <p class="pillar__n">Optional</p>
+          <h3>An account, if you want one</h3>
           <p>Only your email, name and photo — so Mike knows you on another computer. Delete it any time, in one click.</p>
         </div>
       </div>
@@ -314,12 +511,12 @@
     </div>
   </section>
 
-  <!-- ── download ── -->
-  <section class="section section--raised" id="download">
+  <!-- ═══ download ═══ -->
+  <section class="section section--rule" id="download">
     <div class="wrap">
       <div class="download reveal">
         <div class="download__head">
-          <span class="appicon" aria-hidden="true"><img src="/icon-192.png" width="72" height="72" alt="" /></span>
+          <span class="appicon" aria-hidden="true"><img src="/icon-192.png" width="64" height="64" alt="" /></span>
           <div>
             <h2>Get Mike</h2>
             <p>Free during early access. Three steps, about five minutes.</p>
@@ -355,14 +552,15 @@
     </div>
   </section>
 
-  <!-- ── say hello ── -->
+  <!-- ═══ finale ═══ -->
   <section class="finale">
-    <div class="wrap finale__inner">
-      <h2 class="finale__title">Say <span class="swash-word">hello.<svg class="swash" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M6 17C70 7 170 5 294 12"/></svg></span></h2>
+    <div class="wrap finale__inner reveal">
+      <svg class="nibmark finale__mark" aria-hidden="true"><use href="#nib"/></svg>
+      <h2 class="finale__title">Say hello.</h2>
       <p>Mike is free, private, and waiting on your computer.</p>
       <div class="finale__actions">
-        <a class="btn btn--accent" href="/chat/">Try Mike in your browser</a>
-        <a class="btn btn--light" href="#download">Download for Windows</a>
+        <a class="btn btn--ink" href="/chat/">Try Mike in your browser</a>
+        <a class="btn btn--ghost" href="#download">Download for Windows</a>
       </div>
     </div>
   </section>
@@ -376,7 +574,7 @@
     </div>
     <div class="footer__col">
       <h4>Mike</h4>
-      <a href="#features">What it does</a>
+      <a href="#capabilities">Capabilities</a>
       <a href="/chat/">Try Mike</a>
       <a href="#download">Download</a>
     </div>
