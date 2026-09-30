@@ -518,10 +518,202 @@ function relay(stream) {
   });
 }
 
+// ── the visitor's own Cloudflare account, for reading their files ────────
+// Reading an uploaded PDF or photo runs on the visitor's own free Workers AI
+// allowance, connected with Cloudflare's own sign-in (OAuth with PKCE — the
+// same client, scopes and model as Fast mode in the desktop app). Cloudflare's
+// token and API endpoints don't allow calls from a web page, so these three
+// routes relay them. Nothing is stored here: the token lives in the visitor's
+// tab, and a file passes through once, on its way to their own account.
+
+export const CF = {
+  clientId: "b4b5f1fe7d789f7ce244eaee8b647348", // public by design: PKCE, no secret
+  scopes: "ai.read ai.write account-settings.read offline_access",
+  authUrl: "https://dash.cloudflare.com/oauth2/auth",
+  tokenUrl: "https://dash.cloudflare.com/oauth2/token",
+  revokeUrl: "https://dash.cloudflare.com/oauth2/revoke",
+  api: "https://api.cloudflare.com/client/v4",
+  model: "@cf/google/gemma-4-26b-a4b-it",
+  callback: "/chat/cloudflare.html",
+  bodyBytes: 9_000_000,
+  turns: 12,
+  chars: 4000,       // per typed message
+  fileChars: 120000, // all the file text in one request
+  images: 6,
+  imageBytes: 1_600_000,
+  maxTokens: 1400,
+};
+
+const CF_SYSTEM = `You are Mike, a personal AI assistant that lives on people's computers (Windows for now). You're warm, clear and direct — like a sharp friend, never "a language model". You were built by Navdeep and the team at Huddle Labs; say so if someone asks who made you.
+
+Right now you're on Mike's website, running on the visitor's own Cloudflare account. They can attach files: the text of PDFs and documents arrives in their message, and photos arrive as images. Read what they attach carefully and do what they ask with it — summarise, explain, answer questions, make notes, flashcards or a quiz, pull out dates or numbers. Quote the file when it helps. If part of a photo is hard to read, say what you can make out instead of guessing.
+
+You can't touch their computer from here; the desktop Mike can open apps, find and edit files, and read their screen. Use short paragraphs, and lists or **bold** where they help. Answer as fully as the question needs.`;
+
+function sameSite(request) {
+  const origin = request.headers.get("origin");
+  return Boolean(origin) && new URL(origin).host === new URL(request.url).host;
+}
+
+async function limited(request, env) {
+  if (!env.CHAT_LIMIT) return false;
+  const { success } = await env.CHAT_LIMIT.limit({ key: "cf:" + (request.headers.get("cf-connecting-ip") || "local") });
+  return !success;
+}
+
+function cfClientId(env) {
+  return String(env.CF_CLIENT_ID || CF.clientId).trim();
+}
+
+/** POST {code, verifier} or {refresh}: tokens, plus the account they act for. */
+export async function cfToken(request, env, fetchImpl = fetch) {
+  if (request.method !== "POST") return json(405, { error: "method" }, { allow: "POST" });
+  if (!sameSite(request)) return json(403, { error: "origin" });
+  if (await limited(request, env)) return json(429, { error: "busy" }, { "retry-after": "60" });
+  let body;
+  try { body = JSON.parse((await request.text()).slice(0, 8000)); } catch { return json(400, { error: "bad_request" }); }
+  const fields = { client_id: cfClientId(env) };
+  if (typeof body?.code === "string" && typeof body?.verifier === "string") {
+    Object.assign(fields, {
+      grant_type: "authorization_code", code: body.code, code_verifier: body.verifier,
+      redirect_uri: new URL(CF.callback, request.url).href,
+    });
+  } else if (typeof body?.refresh === "string") {
+    Object.assign(fields, { grant_type: "refresh_token", refresh_token: body.refresh });
+  } else {
+    return json(400, { error: "bad_request" });
+  }
+  let resp;
+  try {
+    resp = await fetchImpl(CF.tokenUrl, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
+      body: new URLSearchParams(fields).toString(),
+    });
+  } catch {
+    return json(502, { error: "unavailable" });
+  }
+  if (!resp.ok) {
+    console.log("cloudflare token refused", resp.status);
+    return json(401, { error: "cf_auth" });
+  }
+  const tokens = await resp.json();
+  const out = {
+    access_token: tokens.access_token,
+    refresh_token: tokens.refresh_token || body.refresh || null, // they rotate: keep the newest
+    expires_in: Number(tokens.expires_in) || 3600,
+  };
+  if (fields.grant_type === "authorization_code") {
+    try {
+      const acc = await fetchImpl(`${CF.api}/accounts?per_page=50`, { headers: { authorization: `Bearer ${out.access_token}` } });
+      const data = await acc.json();
+      const first = (data?.result || [])[0];
+      if (!first) return json(403, { error: "no_account" });
+      out.account = { id: first.id, name: first.name || "" };
+    } catch {
+      return json(502, { error: "unavailable" });
+    }
+  }
+  return json(200, out);
+}
+
+/** POST {refresh}: ask Cloudflare to withdraw the connection. */
+export async function cfRevoke(request, env, fetchImpl = fetch) {
+  if (request.method !== "POST") return json(405, { error: "method" }, { allow: "POST" });
+  if (!sameSite(request)) return json(403, { error: "origin" });
+  let body;
+  try { body = JSON.parse((await request.text()).slice(0, 8000)); } catch { return json(400, { error: "bad_request" }); }
+  if (typeof body?.refresh !== "string") return json(400, { error: "bad_request" });
+  try {
+    await fetchImpl(CF.revokeUrl, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ token: body.refresh, token_type_hint: "refresh_token", client_id: cfClientId(env) }).toString(),
+    });
+  } catch { /* forgotten in the tab either way */ }
+  return json(200, { ok: true });
+}
+
+/** The conversation for the visitor's own model: their words, their files. */
+export function cfMessages(body) {
+  if (!body || !Array.isArray(body.messages)) return null;
+  let fileChars = CF.fileChars;
+  let images = CF.images;
+  const out = [{ role: "system", content: CF_SYSTEM }];
+  for (const m of body.messages.slice(-CF.turns)) {
+    if (!m || (m.role !== "user" && m.role !== "assistant") || typeof m.content !== "string") continue;
+    let text = m.content.slice(0, m.role === "user" ? CF.chars : CF.chars * 3).trim();
+    if (m.role === "assistant") { if (text) out.push({ role: "assistant", content: text }); continue; }
+    for (const f of Array.isArray(m.files) ? m.files : []) {
+      if (!f || typeof f.name !== "string" || typeof f.text !== "string" || fileChars <= 0) continue;
+      const name = f.name.slice(0, 120);
+      const part = f.text.slice(0, fileChars);
+      fileChars -= part.length;
+      text += `\n\n[Attached file: ${name}]\n${part}${part.length < f.text.length ? "\n[…the rest of the file was cut to fit]" : ""}\n[End of ${name}]`;
+    }
+    const pics = [];
+    for (const img of Array.isArray(m.images) ? m.images : []) {
+      if (images <= 0) break;
+      if (typeof img !== "string" || img.length > CF.imageBytes || !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(img)) continue;
+      pics.push({ type: "image_url", image_url: { url: img } });
+      images--;
+    }
+    if (!text && !pics.length) continue;
+    out.push(pics.length ? { role: "user", content: [{ type: "text", text: text || "What's in this?" }, ...pics] } : { role: "user", content: text });
+  }
+  return out.length > 1 && out[out.length - 1].role === "user" ? out : null;
+}
+
+/** POST {account, messages} with the visitor's token: streams their model's answer. */
+export async function cfChat(request, env, fetchImpl = fetch) {
+  if (request.method !== "POST") return json(405, { error: "method" }, { allow: "POST" });
+  if (!sameSite(request)) return json(403, { error: "origin" });
+  const auth = request.headers.get("authorization") || "";
+  if (!/^Bearer [\w.~+/=-]{10,}$/.test(auth)) return json(401, { error: "cf_auth" });
+  if (await limited(request, env)) return json(429, { error: "busy" }, { "retry-after": "60" });
+  const raw = await request.text();
+  if (raw.length > CF.bodyBytes) return json(413, { error: "too_long" });
+  let body;
+  try { body = JSON.parse(raw); } catch { return json(400, { error: "bad_request" }); }
+  const account = String(body?.account || "");
+  if (!/^[a-f0-9]{32}$/.test(account)) return json(400, { error: "bad_request" });
+  const messages = cfMessages(body);
+  if (!messages) return json(400, { error: "bad_request" });
+
+  const ctrl = new AbortController();
+  let resp;
+  try {
+    resp = await fetchImpl(`${CF.api}/accounts/${account}/ai/v1/chat/completions`, {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: { authorization: auth, "content-type": "application/json", accept: "text/event-stream" },
+      body: JSON.stringify({ model: CF.model, messages, stream: true, max_tokens: CF.maxTokens, temperature: 0.4 }),
+    });
+  } catch {
+    return json(502, { error: "unavailable" });
+  }
+  if (!resp.ok || !resp.body) {
+    let detail = "";
+    try { detail = (await resp.text()).slice(0, 300).toLowerCase(); } catch { /* none */ }
+    if (resp.status === 401 || resp.status === 403) return json(401, { error: "cf_auth" });
+    if (resp.status === 429 || /4006|neuron|allocation/.test(detail)) return json(429, { error: "cf_limit" });
+    console.log("cloudflare model failed", resp.status, detail.slice(0, 120));
+    return json(502, { error: "unavailable" });
+  }
+  return new Response(relay(new Stream(CF.model, resp, ctrl)), {
+    status: 200,
+    headers: { "content-type": "application/x-ndjson; charset=utf-8", "cache-control": "no-store", "x-model": CF.model },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/chat") return chat(request, env);
+    if (url.pathname === "/api/cf/token") return cfToken(request, env);
+    if (url.pathname === "/api/cf/revoke") return cfRevoke(request, env);
+    if (url.pathname === "/api/cf/chat") return cfChat(request, env);
+    if (url.pathname === "/api/cf/config") return json(200, { clientId: cfClientId(env), scopes: CF.scopes, authUrl: CF.authUrl, callback: CF.callback });
     // Is the preview configured? (Never reveals the key itself.)
     if (url.pathname === "/api/health") {
       const out = { key: Boolean(apiKey(env)), models: models(env) };

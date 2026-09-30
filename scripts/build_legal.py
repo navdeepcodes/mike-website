@@ -61,6 +61,17 @@ This section is about huddlecode.com, not the Mike app.
   they're kept only in your browser tab and disappear when you close it. Your
   IP address is used, briefly, to limit how many messages can be sent each
   minute. Please don't enter anything sensitive in the preview.
+- **Files you attach in the preview.** Reading a PDF, photo or text file
+  runs on *your own* Cloudflare account, which you connect with Cloudflare's
+  sign-in (the same way Fast mode works in the desktop app). Your browser reads
+  the file — a PDF's text, or a photo made smaller — and sends it with your
+  message through huddlecode.com to Cloudflare Workers AI on your account,
+  because Cloudflare doesn't accept those requests from a web page directly.
+  We don't keep the file, what's read from it, or your Cloudflare access: the
+  connection is kept only in that browser tab. Once you're connected, the rest
+  of that conversation also runs on your account. Cloudflare's own terms and
+  privacy policy apply to what's sent to it. Disconnect with the "Your
+  Cloudflare" button, or remove Mike's access from your Cloudflare dashboard.
 """
 
 
@@ -176,8 +187,8 @@ PAGE = """<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/assets/site.css?v=20260930c" />
-<link rel="stylesheet" href="/assets/legal.css?v=20260930c" />
+<link rel="stylesheet" href="/assets/site.css?v=20260930d" />
+<link rel="stylesheet" href="/assets/legal.css?v=20260930d" />
 <script>document.documentElement.classList.remove("no-js")</script>
 </head>
 <body>
@@ -218,7 +229,7 @@ PAGE = """<!doctype html>
     <span><a href="/privacy/">Privacy Policy</a> · <a href="/terms/">Terms of Use</a> · <a href="/">Home</a></span>
   </div>
 </footer>
-<script src="/assets/site.js?v=20260930c" defer></script>
+<script src="/assets/site.js?v=20260930d" defer></script>
 </body>
 </html>
 """

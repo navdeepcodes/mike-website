@@ -1,7 +1,7 @@
 // The /api/chat preview, with NVIDIA's API replaced by a stand-in.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import worker, { chat, MODELS, TOOLS, describe, clean, sanitize } from "../src/worker.js";
+import worker, { chat, MODELS, TOOLS, describe, clean, sanitize, cfToken, cfChat, cfMessages, cfRevoke, CF } from "../src/worker.js";
 
 const URL_ = "https://huddlecode.com/api/chat";
 const env = (extra = {}) => ({ NVIDIA_API_KEY: "nvapi-test-secret", ...extra });
@@ -274,4 +274,111 @@ test("if Workers AI fails, NVIDIA answers", async () => {
   const AI = { run: async () => { throw new Error("capacity"); } };
   const data = await streamed(await chat(req(ask("hi")), env({ AI }), nvidia([{ content: "NVIDIA here." }])));
   assert.equal(data.reply, "NVIDIA here.");
+});
+
+// ── the visitor's own Cloudflare account ──
+
+const ACCOUNT = "0123456789abcdef0123456789abcdef";
+function cfReq(path, body, headers = {}) {
+  return new Request("https://huddlecode.com" + path, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: "https://huddlecode.com", "cf-connecting-ip": "1.2.3.4", ...headers },
+    body: JSON.stringify(body),
+  });
+}
+function cloudflare(routes) {
+  const calls = [];
+  const impl = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    for (const [match, respond] of routes) if (String(url).includes(match)) return respond(init);
+    return new Response("{}", { status: 404 });
+  };
+  impl.calls = calls;
+  return impl;
+}
+
+test("connecting: the code is exchanged with PKCE and the account found", async () => {
+  const f = cloudflare([
+    ["/oauth2/token", () => new Response(JSON.stringify({ access_token: "acc-token-123", refresh_token: "ref-1", expires_in: 3600 }))],
+    ["/accounts?", () => new Response(JSON.stringify({ result: [{ id: ACCOUNT, name: "Aanya's Account" }] }))],
+  ]);
+  const res = await cfToken(cfReq("/api/cf/token", { code: "the-code", verifier: "the-verifier" }), {}, f);
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.access_token, "acc-token-123");
+  assert.deepEqual(data.account, { id: ACCOUNT, name: "Aanya's Account" });
+  const sent = new URLSearchParams(f.calls[0].init.body);
+  assert.equal(sent.get("grant_type"), "authorization_code");
+  assert.equal(sent.get("code_verifier"), "the-verifier");
+  assert.equal(sent.get("client_id"), CF.clientId);
+  assert.equal(sent.get("redirect_uri"), "https://huddlecode.com/chat/cloudflare.html");
+  assert.equal(sent.get("client_secret"), null);
+});
+
+test("connecting: only this site may use the relay, and a refusal says so", async () => {
+  const f = cloudflare([["/oauth2/token", () => new Response("{}", { status: 400 })]]);
+  assert.equal((await cfToken(cfReq("/api/cf/token", { code: "c", verifier: "v" }, { origin: "https://evil.example" }), {}, f)).status, 403);
+  const noOrigin = new Request("https://huddlecode.com/api/cf/token", { method: "POST", body: "{}" });
+  assert.equal((await cfToken(noOrigin, {}, f)).status, 403);
+  const res = await cfToken(cfReq("/api/cf/token", { code: "c", verifier: "v" }), {}, f);
+  assert.equal(res.status, 401);
+  assert.equal((await res.json()).error, "cf_auth");
+});
+
+test("renewing keeps the newest refresh token", async () => {
+  const f = cloudflare([["/oauth2/token", () => new Response(JSON.stringify({ access_token: "acc-2-xxxxxxxx", refresh_token: "ref-2" }))]]);
+  const data = await (await cfToken(cfReq("/api/cf/token", { refresh: "ref-1" }), {}, f)).json();
+  assert.equal(data.refresh_token, "ref-2");
+  assert.equal(new URLSearchParams(f.calls[0].init.body).get("grant_type"), "refresh_token");
+});
+
+test("files reach the visitor's own model: text in the message, photos as images", () => {
+  const msgs = cfMessages({ messages: [
+    { role: "user", content: "Summarise this", files: [{ name: "notes.pdf", text: "Newton's laws of motion." }], images: ["data:image/jpeg;base64,/9j/AAAA", "javascript:alert(1)"] },
+  ] });
+  assert.equal(msgs[0].role, "system");
+  assert.match(msgs[0].content, /visitor's own Cloudflare account/);
+  const user = msgs[1];
+  assert.equal(user.content[0].type, "text");
+  assert.match(user.content[0].text, /\[Attached file: notes\.pdf\][\s\S]*Newton's laws/);
+  assert.equal(user.content.length, 2); // the one real image; the bad one is dropped
+  assert.equal(user.content[1].image_url.url, "data:image/jpeg;base64,/9j/AAAA");
+});
+
+test("the file text is capped for the whole request", () => {
+  const big = "x".repeat(CF.fileChars + 5000);
+  const msgs = cfMessages({ messages: [{ role: "user", content: "read", files: [{ name: "a.txt", text: big }, { name: "b.txt", text: "more" }] }] });
+  assert.match(msgs[1].content, /cut to fit/);
+  assert.doesNotMatch(msgs[1].content, /b\.txt/);
+});
+
+test("the chat goes to the visitor's account with their token, and streams back", async () => {
+  const f = cloudflare([["/ai/v1/chat/completions", () => new Response(sse({ content: "Newton says F = ma." }), { status: 200, headers: { "content-type": "text/event-stream" } })]]);
+  const res = await cfChat(cfReq("/api/cf/chat", { account: ACCOUNT, messages: [{ role: "user", content: "Explain", files: [{ name: "n.pdf", text: "F = ma" }] }] }, { authorization: "Bearer visitor-token-abc" }), {}, f);
+  const data = await streamed(res);
+  assert.equal(data.reply, "Newton says F = ma.");
+  assert.equal(f.calls[0].url, `${CF.api}/accounts/${ACCOUNT}/ai/v1/chat/completions`);
+  assert.equal(f.calls[0].init.headers.authorization, "Bearer visitor-token-abc");
+  const sent = JSON.parse(f.calls[0].init.body);
+  assert.equal(sent.model, CF.model);
+  assert.equal(sent.stream, true);
+});
+
+test("no token, a refused token, and a used-up allowance each say what happened", async () => {
+  const body = { account: ACCOUNT, messages: [{ role: "user", content: "hi" }] };
+  assert.equal((await cfChat(cfReq("/api/cf/chat", body), {}, cloudflare([]))).status, 401);
+  const refused = cloudflare([["/ai/v1/", () => new Response("{}", { status: 401 })]]);
+  assert.equal((await (await cfChat(cfReq("/api/cf/chat", body, { authorization: "Bearer t-1234567890" }), {}, refused)).json()).error, "cf_auth");
+  const spent = cloudflare([["/ai/v1/", () => new Response('{"errors":[{"code":4006,"message":"daily free allocation of 10,000 neurons used"}]}', { status: 400 })]]);
+  const res = await cfChat(cfReq("/api/cf/chat", body, { authorization: "Bearer t-1234567890" }), {}, spent);
+  assert.equal(res.status, 429);
+  assert.equal((await res.json()).error, "cf_limit");
+  assert.equal((await cfChat(cfReq("/api/cf/chat", { account: "../etc", messages: body.messages }, { authorization: "Bearer t-1234567890" }), {}, spent)).status, 400);
+});
+
+test("disconnecting asks Cloudflare to revoke the refresh token", async () => {
+  const f = cloudflare([["/oauth2/revoke", () => new Response("")]]);
+  const res = await cfRevoke(cfReq("/api/cf/revoke", { refresh: "ref-9" }), {}, f);
+  assert.equal(res.status, 200);
+  assert.equal(new URLSearchParams(f.calls[0].init.body).get("token"), "ref-9");
 });

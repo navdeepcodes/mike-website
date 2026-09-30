@@ -22,6 +22,19 @@
   let turns = [];
   let busy = null; // the AbortController of the request in flight
 
+  // Files: read here in the browser, then sent with the message to the
+  // visitor's own Cloudflare account (cloud.js). What was read is kept in
+  // memory only, never in storage.
+  const cloud = window.MikeCloud;
+  const tray = $("tray");
+  const fileInput = $("file");
+  const attachBtn = $("attach");
+  const pill = $("cfpill");
+  const CF_TURNS = 12;
+  let pending = [];           // attached, not yet sent
+  let waiting = null;         // a message held until Cloudflare is connected
+  const payloads = new Map(); // turn index -> { files, images }
+
   // ── storage: the conversation survives a refresh, not a closed tab ──
   function load() {
     try {
@@ -112,8 +125,13 @@
     return svg;
   }
 
-  function addYou(text) {
+  function addYou(text, names) {
     const li = el("li", "msg msg--you");
+    if (names && names.length) {
+      const row = el("div", "sent-files");
+      names.forEach((n) => row.appendChild(el("span", "sent-file", n)));
+      li.appendChild(row);
+    }
     li.appendChild(el("div", "bubble", text));
     thread.appendChild(li);
     return li;
@@ -199,6 +217,8 @@
     resting: "The preview is resting for the moment. The desktop Mike is always on.",
     offline: "You seem to be offline. Check your connection and try again.",
     failed: "I couldn't answer that just now. Try again in a moment.",
+    cf_limit: "Your Cloudflare account's free AI allowance for today is used up. It resets at midnight UTC (5:30 am in India).",
+    too_long: "That's more than I can read in one go here. Try fewer or smaller files.",
   };
 
   function notice(li, kind, retry) {
@@ -242,7 +262,9 @@
     syncSend();
   }
   function syncSend() {
-    send.disabled = !busy && !input.value.trim();
+    const ready = pending.some((f) => f.status === "ready");
+    const reading = pending.some((f) => f.status === "reading");
+    send.disabled = !busy && (reading || (!input.value.trim() && !ready));
     const n = input.value.length;
     count.hidden = n < 400;
     count.textContent = `${n}/500`;
@@ -268,17 +290,22 @@
     };
     let res;
     try {
-      res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: turns.slice(-MAX_TURNS) }),
-        signal: controller.signal,
-      });
+      res = await request(controller.signal);
     } catch (err) {
       if (err && err.name === "AbortError") { li.remove(); setBusy(null); return; }
       return fail(navigator.onLine === false ? "offline" : "failed");
     }
     if (!res.ok || !res.body) {
+      const why = await res.json().catch(() => ({}));
+      if (why.error === "cf_auth") {
+        // Cloudflare no longer takes the token: connect again, then carry on.
+        cloud.forget();
+        syncPill();
+        li.remove();
+        setBusy(null);
+        return askToConnect(null, [], true);
+      }
+      if (why.error === "cf_limit" || why.error === "too_long") return fail(why.error);
       return fail(res.status === 429 ? "busy" : res.status === 503 ? "resting" : "failed");
     }
 
@@ -341,14 +368,229 @@
 
   function submit(text) {
     const value = (text || "").trim().slice(0, 500);
-    if (!value || busy) return;
-    turns.push({ role: "user", content: value });
+    const files = pending.filter((f) => f.status === "ready");
+    if (busy || pending.some((f) => f.status === "reading")) return;
+    if (!value && !files.length) return;
+    if (files.length && !(cloud && cloud.connected())) return askToConnect(value, files);
+    post(value, files);
+  }
+
+  function post(value, files) {
+    const content = value || "Have a look at this and tell me what's in it.";
+    const names = files.map((f) => f.name);
+    turns.push(names.length ? { role: "user", content, files: names } : { role: "user", content });
+    if (files.length) {
+      payloads.set(turns.length - 1, {
+        files: files.filter((f) => f.text).map((f) => ({ name: f.name, text: f.text })),
+        images: files.flatMap((f) => f.images || []),
+      });
+    }
     save();
-    addYou(value);
+    addYou(content, names);
     setTitle();
     input.value = "";
+    pending = [];
+    renderTray();
     grow();
     ask();
+  }
+
+  /** The answer's request: the visitor's own Cloudflare when connected,
+   *  the shared preview otherwise. */
+  async function request(signal) {
+    const token = cloud && cloud.connected() ? await cloud.token() : null;
+    if (token) {
+      const start = Math.max(0, turns.length - CF_TURNS);
+      const messages = turns.slice(start).map((m, k) => {
+        const p = payloads.get(start + k);
+        return p ? { role: m.role, content: m.content, files: p.files, images: p.images } : { role: m.role, content: m.content };
+      });
+      return fetch("/api/cf/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: "Bearer " + token },
+        body: JSON.stringify({ account: cloud.account().id, messages }),
+        signal,
+      });
+    }
+    return fetch("/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ messages: turns.slice(-MAX_TURNS).map((m) => ({ role: m.role, content: m.content })) }),
+      signal,
+    });
+  }
+
+  // ── connecting the visitor's Cloudflare, when there are files to read ──
+  const CONNECT_ERRORS = {
+    closed: "The Cloudflare window was closed before it finished.",
+    declined: "Cloudflare wasn't allowed to connect.",
+    no_account: "That Cloudflare sign-in didn't come with an account. Try again and pick your account.",
+  };
+
+  function askToConnect(value, files, again) {
+    waiting = again ? { resend: true } : { value, files };
+    if (!again) {
+      pending = [];
+      renderTray();
+      input.value = "";
+      grow();
+    }
+    const li = el("li", "msg msg--mike msg--connect");
+    const box = el("div", "connect");
+    const head = el("div", "connect__head");
+    head.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10.5a3.5 3.5 0 0 0 .4-7A5.5 5.5 0 0 0 7.3 9.6 4.2 4.2 0 0 0 7 18Z"/></svg>';
+    head.appendChild(el("b", "", again ? "Connect your Cloudflare again" : "Read your files on your own Cloudflare"));
+    box.appendChild(head);
+    box.appendChild(el("p", "", again
+      ? "Cloudflare asked to sign in again. Once you do, I'll carry on."
+      : "Reading PDFs and photos runs on your own free Cloudflare account — the way Fast mode works in the desktop Mike. It takes a minute to set up, and it's free."));
+    if (!again && files.length) {
+      const row = el("div", "sent-files");
+      files.forEach((f) => row.appendChild(el("span", "sent-file", f.name)));
+      box.appendChild(row);
+    }
+    const actions = el("div", "connect__actions");
+    const go = el("button", "btn btn--try btn--sm", "Connect Cloudflare");
+    go.type = "button";
+    const later = el("button", "btn btn--ghost btn--sm", "Not now");
+    later.type = "button";
+    actions.append(go, later);
+    box.appendChild(actions);
+    box.appendChild(el("p", "connect__fine", "Your files go to your own account and aren't kept by Huddle Labs. Disconnect any time from the “Your Cloudflare” button."));
+    const err = el("p", "connect__err");
+    err.hidden = true;
+    box.appendChild(err);
+    li.appendChild(box);
+    thread.appendChild(li);
+    app.classList.add("has-thread");
+    follow(true);
+
+    go.addEventListener("click", async () => {
+      go.disabled = true;
+      go.textContent = "Waiting for Cloudflare…";
+      err.hidden = true;
+      try {
+        await cloud.connect();
+      } catch (e) {
+        go.disabled = false;
+        go.textContent = "Try again";
+        err.textContent = CONNECT_ERRORS[e && e.kind] || "Couldn't connect just now. Try again in a moment.";
+        err.hidden = false;
+        return;
+      }
+      li.remove();
+      syncPill();
+      const w = waiting;
+      waiting = null;
+      if (w && w.resend) ask();
+      else if (w) post(w.value, w.files);
+    });
+    later.addEventListener("click", () => {
+      li.remove();
+      const w = waiting;
+      waiting = null;
+      if (w && !w.resend) {
+        pending = w.files;
+        input.value = w.value;
+        renderTray();
+        grow();
+      }
+      setTitle();
+    });
+  }
+
+  // ── attaching ──
+  function renderTray() {
+    if (!tray) return;
+    tray.replaceChildren();
+    tray.hidden = !pending.length;
+    for (const f of pending) {
+      const chip = el("div", "chip chip--" + f.status);
+      if (f.thumb) {
+        const img = document.createElement("img");
+        img.className = "chip__thumb";
+        img.src = f.thumb;
+        img.alt = "";
+        chip.appendChild(img);
+      } else {
+        chip.appendChild(el("span", "chip__kind", f.kind === "pdf" ? "PDF" : f.kind === "image" ? "IMG" : f.kind === "text" ? "TXT" : "…"));
+      }
+      const meta = el("span", "chip__meta");
+      meta.appendChild(el("span", "chip__name", f.name));
+      meta.appendChild(el("span", "chip__note", f.status === "reading" ? "Reading…" : f.status === "error" ? f.error : f.note || ""));
+      chip.appendChild(meta);
+      const x = el("button", "chip__x", "×");
+      x.type = "button";
+      x.setAttribute("aria-label", "Remove " + f.name);
+      x.addEventListener("click", () => { pending = pending.filter((p) => p !== f); renderTray(); });
+      chip.appendChild(x);
+      tray.appendChild(chip);
+    }
+    syncSend();
+  }
+
+  function addFiles(list) {
+    if (!cloud) return;
+    for (const file of Array.from(list || [])) {
+      if (pending.length >= cloud.LIMITS.files) break;
+      const f = { name: file.name || "pasted image.png", kind: "", status: "reading", note: "" };
+      pending.push(f);
+      cloud.read(file).then((r) => {
+        Object.assign(f, r, { status: "ready" });
+        if (r.kind === "image" && r.images && r.images[0]) f.thumb = r.images[0];
+        renderTray();
+      }, (e) => {
+        f.status = "error";
+        f.error = e && e.message ? e.message : "Couldn't read this file.";
+        renderTray();
+      });
+    }
+    renderTray();
+  }
+
+  if (attachBtn && fileInput) {
+    attachBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => { addFiles(fileInput.files); fileInput.value = ""; input.focus(); });
+  }
+  app.addEventListener("dragover", (e) => {
+    if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes("Files")) { e.preventDefault(); app.classList.add("is-dropping"); }
+  });
+  app.addEventListener("dragleave", (e) => { if (!e.relatedTarget || !app.contains(e.relatedTarget)) app.classList.remove("is-dropping"); });
+  app.addEventListener("drop", (e) => {
+    app.classList.remove("is-dropping");
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); }
+  });
+  input.addEventListener("paste", (e) => {
+    const files = e.clipboardData ? Array.from(e.clipboardData.files || []) : [];
+    if (files.length) { e.preventDefault(); addFiles(files); }
+  });
+
+  // ── the “Your Cloudflare” button: who's connected, and disconnecting ──
+  let asking = 0;
+  function syncPill() {
+    if (!pill) return;
+    const on = Boolean(cloud && cloud.connected());
+    pill.hidden = !on;
+    if (on) {
+      const a = cloud.account();
+      $("cfpill-text").textContent = "Your Cloudflare";
+      pill.title = "Mike reads your files on " + (a && a.name ? a.name : "your Cloudflare account") + ". Click to disconnect.";
+    }
+  }
+  if (pill) {
+    pill.addEventListener("click", async () => {
+      if (!asking) {
+        $("cfpill-text").textContent = "Disconnect?";
+        pill.classList.add("is-asking");
+        asking = setTimeout(() => { asking = 0; pill.classList.remove("is-asking"); syncPill(); }, 3000);
+        return;
+      }
+      clearTimeout(asking);
+      asking = 0;
+      pill.classList.remove("is-asking");
+      await cloud.disconnect();
+      syncPill();
+    });
   }
 
   function newChat() {
@@ -356,6 +598,10 @@
     turns = [];
     save();
     thread.replaceChildren();
+    payloads.clear();
+    pending = [];
+    waiting = null;
+    renderTray();
     setTitle();
     input.focus();
   }
@@ -394,7 +640,7 @@
   // ── start: restore the conversation, or take ?q= from the home page ──
   turns = load();
   turns.forEach((m) => {
-    if (m.role === "user") addYou(m.content);
+    if (m.role === "user") addYou(m.content, m.files);
     else {
       const { li, body } = addMike();
       body.innerHTML = markdown(m.content);
@@ -404,6 +650,16 @@
   });
   setTitle();
   if (turns.length) follow(true);
+  syncPill();
+  if (cloud) {
+    cloud.resume().then((c) => {
+      if (!c) return;
+      syncPill();
+      const { body } = addMike();
+      body.textContent = "Your Cloudflare is connected. Attach your file again and send it — I'll read it on your account.";
+      app.classList.add("has-thread");
+    }).catch(() => { /* a stale or refused sign-in: nothing to finish */ });
+  }
   syncSend();
 
   const q = new URLSearchParams(location.search).get("q");

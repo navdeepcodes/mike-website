@@ -323,3 +323,83 @@ html:has(.chat-body), .chat-body { height: 100%; overflow: hidden; overscroll-be
   .fine__short { display: inline; }
   .bar__tag { display: none; }
 }
+
+/* ── attaching files: the paperclip, the chips, dropping ── */
+.attach {
+  width: 34px; height: 34px; border-radius: 50%; border: 0; flex: none;
+  background: transparent; color: var(--ink-soft);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.attach:hover { background: var(--raised); color: var(--ink); }
+.attach svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+.tray { display: flex; flex-wrap: wrap; gap: 8px; padding: 2px 0 10px; }
+.tray[hidden] { display: none; }
+.chip {
+  display: flex; align-items: center; gap: 10px; max-width: 280px;
+  padding: 6px 6px 6px 6px; border-radius: 12px;
+  border: 1px solid var(--hairline); background: var(--raised);
+  font-family: var(--sans);
+}
+.chip__kind {
+  width: 36px; height: 36px; border-radius: 8px; flex: none; display: grid; place-items: center;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
+  background: var(--surface); border: 1px solid var(--hairline); color: var(--ink-soft);
+}
+.chip__thumb { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; flex: none; }
+.chip__meta { display: flex; flex-direction: column; min-width: 0; }
+.chip__name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip__note { font-size: 12px; color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip--reading .chip__kind { animation: chip-pulse 1.2s ease-in-out infinite; }
+.chip--error { border-color: color-mix(in srgb, var(--stop) 40%, var(--hairline)); }
+.chip--error .chip__note { color: var(--stop); white-space: normal; }
+.chip__x {
+  width: 24px; height: 24px; border-radius: 50%; border: 0; flex: none; margin-left: 2px;
+  background: transparent; color: var(--ink-mute); font-size: 17px; line-height: 1; cursor: pointer;
+}
+.chip__x:hover { background: var(--surface); color: var(--ink); }
+@keyframes chip-pulse { 50% { opacity: 0.45; } }
+
+.app.is-dropping .composer { border-color: var(--ink); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ink) 8%, transparent); }
+
+.sent-files { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-bottom: 6px; }
+.sent-file {
+  font: 500 12.5px/1 var(--sans); color: var(--ink-soft);
+  padding: 6px 10px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--surface);
+  max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── connecting the visitor's Cloudflare ── */
+.connect {
+  border: 1px solid var(--hairline); border-radius: 16px; background: var(--surface);
+  padding: 18px 20px; box-shadow: var(--shadow-sm); font-family: var(--sans); max-width: 560px;
+}
+.connect__head { display: flex; align-items: center; gap: 10px; font-size: 15.5px; }
+.connect__head svg { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linejoin: round; }
+.connect p { margin: 10px 0 0; color: var(--ink-soft); font-size: 14.5px; line-height: 1.55; }
+.connect .sent-files { justify-content: flex-start; margin: 12px 0 0; }
+.connect__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.connect .connect__fine { font-size: 12.5px; color: var(--ink-mute); margin-top: 12px; }
+.connect .connect__err { color: var(--stop); font-size: 13.5px; }
+
+.cfpill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--hairline);
+  background: var(--surface); color: var(--ink); font: 500 13px/1 var(--sans); cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.cfpill[hidden] { display: none; }
+.cfpill:hover { border-color: var(--ink-faint); }
+.cfpill__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
+.cfpill.is-asking { color: var(--stop); border-color: color-mix(in srgb, var(--stop) 45%, var(--hairline)); }
+.cfpill.is-asking .cfpill__dot { background: var(--stop); }
+
+@media (max-width: 640px) {
+  .composer { flex-wrap: wrap; }
+  .composer textarea { flex: 1; min-width: 0; }
+  .tray { flex-basis: 100%; padding-top: 4px; }
+  .chip { max-width: 100%; }
+  .cfpill span:last-child { display: none; }
+  .cfpill { padding: 8px; }
+}
