@@ -203,6 +203,10 @@ code, kbd { font-family: var(--mono); font-size: 0.86em; }
   display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   color: var(--ink-mute); font-size: 13px;
 }
+.footer__credit {
+  max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter) calc(28px + env(safe-area-inset-bottom));
+  color: var(--ink-mute); font-size: 13px; text-align: center;
+}
 @media (max-width: 760px) {
   .footer__inner { grid-template-columns: 1fr 1fr; }
   .footer__brand { grid-column: 1 / -1; }
