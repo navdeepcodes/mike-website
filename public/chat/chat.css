@@ -1,6 +1,8 @@
 /* Try Mike — the in-browser chat, dressed like Mike's desktop window. */
 
-.chat-body { overflow: hidden; }
+/* A fixed app window: the page itself never scrolls, bounces or pans --
+   only the conversation does. */
+html:has(.chat-body), .chat-body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 
 .app {
   height: 100vh;
@@ -279,8 +281,14 @@
 .fine a { color: var(--ink-soft); }
 .fine__short { display: none; }
 
-/* ── tablets and phones: no rail; the header carries the brand ── */
-@media (max-width: 900px) {
+/* ── narrower windows keep the desktop layout, with a slimmer rail ── */
+@media (max-width: 900px) and (min-width: 641px) {
+  .app { grid-template-columns: 220px 1fr; }
+  .getcard p { font-size: 13.5px; }
+}
+
+/* ── phones: no rail; the header carries the brand ── */
+@media (max-width: 640px) {
   .app { grid-template-columns: 1fr; }
   .rail { display: none; }
   .bar { padding-left: 16px; padding-right: 12px; }

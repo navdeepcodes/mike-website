@@ -411,21 +411,39 @@ class Answer {
   cancel() {}
 }
 
+// Given tools, Workers AI's Llama answers every message with a tool call —
+// "hey" became "look at your screen", "2+2" a terminal command. So answering
+// in words is a tool too: each turn is an explicit choice between saying
+// something and what the desktop Mike would do.
+export const REPLY = {
+  name: "reply",
+  description: "Answer the visitor in words: conversation, questions, explanations, studying help, writing, maths and code — anything that doesn't need their computer. Give the whole answer here, as complete as the question deserves.",
+  parameters: { type: "object", properties: { text: str("Your full answer, in Mike's own voice (you are Mike, never 'a language model'): explain with a simple example, show the steps of maths, write the whole poem or email, use short paragraphs or a list when it helps") }, required: ["text"] },
+};
+const REPLY_NOTE = "Here you answer only through tools: reply for anything you say in words, the others for what the desktop Mike would do on their computer. In reply you speak as Mike, warmly and like a person — never as \"a computer program\" or \"a language model\".";
+
 async function openWorkersAI(env, model, messages) {
-  const tools = TOOLS.map((t) => ({ name: t.function.name, description: t.function.description, parameters: t.function.parameters }));
+  const tools = [REPLY, ...TOOLS.map((t) => ({ name: t.function.name, description: t.function.description, parameters: t.function.parameters }))];
   const out = await env.AI.run(model, {
-    messages: [{ role: "system", content: SYSTEM }, ...messages],
+    messages: [{ role: "system", content: `${SYSTEM}\n\n${REPLY_NOTE}` }, ...messages],
     tools,
     max_tokens: LIMITS.maxTokens,
     temperature: 0.4,
   });
-  const calls = (out && out.tool_calls) || [];
-  const shaped = calls.map((c) => {
+  const said = [];
+  const shaped = [];
+  for (const c of (out && out.tool_calls) || []) {
     const f = c.function || c;
+    if (f.name === REPLY.name) {
+      let args = f.arguments;
+      if (typeof args === "string") { try { args = JSON.parse(args); } catch { args = { text: args }; } }
+      said.push(String(args?.text ?? ""));
+      continue;
+    }
     const args = typeof f.arguments === "string" ? f.arguments : JSON.stringify(f.arguments || {});
-    return { name: f.name || "", args };
-  });
-  const text = clean(typeof out?.response === "string" ? out.response : "");
+    shaped.push({ name: f.name || "", args });
+  }
+  const text = clean([typeof out?.response === "string" ? out.response : "", ...said].filter((s) => s.trim()).join("\n\n"));
   const answer = new Answer(model, text, shaped);
   if (!answer.started()) throw new Error(`${model}: empty reply`);
   return answer;

@@ -64,7 +64,9 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+/* Nothing may widen the page: on a phone that makes it slide sideways and zoom out. */
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; overflow-x: clip; }
+body { overflow-x: clip; }
 
 body {
   margin: 0;
@@ -120,6 +122,9 @@ code, kbd { font-family: var(--mono); font-size: 0.86em; }
 .btn:active { transform: translateY(1px); }
 .btn--ink, .btn--accent { background: var(--ink); color: var(--ground); }
 .btn--ink:hover, .btn--accent:hover { opacity: 0.86; }
+/* the one copper button: trying Mike, right now, in the browser */
+.btn--try { background: var(--accent); color: var(--accent-ink); box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent); }
+.btn--try:hover { filter: brightness(1.06); }
 .btn--ghost { background: transparent; color: var(--ink); border-color: var(--hairline); }
 .btn--ghost:hover { border-color: var(--ink-faint); background: var(--raised); }
 .btn--light { background: var(--surface); color: var(--ink); border-color: var(--hairline); }
@@ -160,7 +165,12 @@ code, kbd { font-family: var(--mono); font-size: 0.86em; }
 .nav__links { display: flex; align-items: center; gap: 26px; margin-left: auto; }
 .nav__links a:not(.btn) { text-decoration: none; color: var(--ink-soft); font-size: 14px; transition: color 0.15s ease; }
 .nav__links a:not(.btn):hover, .nav__links a[aria-current="page"] { color: var(--ink); }
-.nav__try { display: inline-flex; align-items: center; gap: 7px; }
+.nav__links a.nav__try {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 13px; border-radius: 999px; border: 1px solid var(--hairline);
+  color: var(--ink); font-weight: 500; background: var(--surface);
+}
+.nav__links a.nav__try:hover { border-color: var(--ink-faint); }
 
 @media (max-width: 760px) {
   .nav__inner { gap: 14px; }

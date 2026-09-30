@@ -242,6 +242,34 @@ test("Workers AI tool calls become 'Mike would' steps", async () => {
   assert.equal(data.actions[0].title, "Open Spotify");
 });
 
+test("Workers AI can answer in words: the reply tool is its text, not a step", async () => {
+  let offered = [];
+  const AI = { run: async (_m, input) => { offered = input.tools.map((t) => t.name); return { response: null, tool_calls: [{ name: "reply", arguments: { text: "Hey! What's up?" } }] }; } };
+  const f = nvidia([{ content: "x" }]);
+  const data = await streamed(await chat(req(ask("hey")), env({ AI }), f));
+  assert.equal(data.reply, "Hey! What's up?");
+  assert.deepEqual(data.actions, []);
+  assert.equal(offered[0], "reply");
+  assert.equal(f.calls.length, 0);
+});
+
+test("Workers AI can say something and show a step in the same answer", async () => {
+  const AI = { run: async () => ({ tool_calls: [
+    { name: "reply", arguments: '{"text":"On your computer I\'d open it for you."}' },
+    { name: "open_application", arguments: { name: "Spotify" } },
+  ] }) };
+  const data = await streamed(await chat(req(ask("open spotify")), env({ AI }), nvidia([{ content: "x" }])));
+  assert.equal(data.reply, "On your computer I'd open it for you.");
+  assert.equal(data.actions.length, 1);
+  assert.equal(data.actions[0].title, "Open Spotify");
+});
+
+test("an empty reply from Workers AI hands over to NVIDIA", async () => {
+  const AI = { run: async () => ({ tool_calls: [{ name: "reply", arguments: { text: "  " } }] }) };
+  const data = await streamed(await chat(req(ask("hey")), env({ AI }), nvidia([{ content: "NVIDIA here." }])));
+  assert.equal(data.reply, "NVIDIA here.");
+});
+
 test("if Workers AI fails, NVIDIA answers", async () => {
   const AI = { run: async () => { throw new Error("capacity"); } };
   const data = await streamed(await chat(req(ask("hi")), env({ AI }), nvidia([{ content: "NVIDIA here." }])));
